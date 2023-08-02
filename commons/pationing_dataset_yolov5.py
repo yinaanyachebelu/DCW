@@ -100,17 +100,17 @@ def main():
         '-i', '--imageDir',
         help='Path to the folder where the image dataset is stored. If not specified, the CWD will be used.',
         type=str,
-        default='datasets/CottonWeedDet12/weedImages')
+        default='datasets/weedImages')
     parser.add_argument(
         '-l', '--labelDir',
         help='Path to the folder where the labels are stored. If not specified, the CWD will be used.',
         type=str,
-        default='datasets/CottonWeedDet12/annotation_YOLO_txt')
+        default='datasets/annotation_YOLO_txt')
     parser.add_argument(
         '-lj', '--labeljsonDir',
         help='Path to the folder where the json labels are stored. If not specified, the CWD will be used.',
         type=str,
-        default='datasets/CottonWeedDet12/annotation_VGG_json')
+        default='datasets/annotation_VGG_json')
     parser.add_argument(
         '-o', '--outputDir',
         help='Path to the yolov4 folder where the train and test dirs should be created. '
