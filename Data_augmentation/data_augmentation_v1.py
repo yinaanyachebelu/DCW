@@ -40,6 +40,7 @@ def aug_images(folder_idx):
         print(file)
 
         image = cv2.imread(file)
+        #image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         xmlTitle, txtExt = os.path.splitext(os.path.basename(file))
         cv2.imwrite(os.path.join(images_out_dir, os.path.basename(file)), image)
         copyfile(label_dir + xmlTitle + '.txt', labels_out_dir + xmlTitle + '.txt')
