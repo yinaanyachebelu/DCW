@@ -61,7 +61,7 @@ class FocalLoss(nn.Module):
 
 def compute_loss(p, targets, model):  # predictions, targets, model
     device = targets.device
-    #print(device)
+    #print("device is: ", device)
     lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
     tcls, tbox, indices, anchors = build_targets(p, targets, model)  # targets
     h = model.hyp  # hyperparameters
