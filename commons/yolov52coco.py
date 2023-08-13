@@ -25,20 +25,25 @@ class YOLOV5ToCOCO(object):
         self.src = self.src_data.parent
         self.train_txt_path = self.src_data / 'train.txt'
         self.val_txt_path = self.src_data / 'val.txt'
+        self.test_txt_path = self.src_data / 'test.txt'
 
         #COCO
         self.dst = Path(self.src) / f"{Path(self.src_data).name}_COCO_format"
         self.coco_train = "train2017"
         self.coco_val = "val2017"
+        self.coco_test = "test2017"
         self.coco_annotation = "annotations"
         self.coco_train_json = self.dst / self.coco_annotation \
                                / f'instances_{self.coco_train}.json'
         self.coco_val_json = self.dst / self.coco_annotation \
                              / f'instances_{self.coco_val}.json'
+        self.coco_test_json = self.dst / self.coco_annotation \
+                             / f'instances_{self.coco_test}.json'
 
         mkdir(self.dst)
         mkdir(self.dst / self.coco_train)
         mkdir(self.dst / self.coco_val)
+        mkdir(self.dst / self.coco_test)
         mkdir(self.dst / self.coco_annotation)
 
         # json
@@ -75,6 +80,8 @@ class YOLOV5ToCOCO(object):
         self.train_files = read_txt(self.train_txt_path)
         if Path(self.val_txt_path).exists():
             self.valid_files = read_txt(self.val_txt_path)
+        if Path(self.test_txt_path).exists():
+            self.test_files = read_txt(self.test_txt_path)                       
 
         train_dest_dir = Path(self.dst) / self.coco_train
         self.gen_dataset(self.train_files, train_dest_dir,
@@ -84,6 +91,11 @@ class YOLOV5ToCOCO(object):
         if Path(self.val_txt_path).exists():
             self.gen_dataset(self.valid_files, val_dest_dir,
                              self.coco_val_json)
+                             
+        test_dest_dir = Path(self.dst) / self.coco_test
+        if Path(self.test_txt_path).exists():
+            self.gen_dataset(self.test_files, test_dest_dir,
+                             self.coco_test_json)                             
 
         print(f"The yolov4 directory is: {str(self.dst)}")
 
