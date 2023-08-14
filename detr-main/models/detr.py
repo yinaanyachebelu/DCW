@@ -20,6 +20,7 @@ from .transformer import build_transformer
 
 class DETR(nn.Module):
     """ This is the DETR module that performs object detection """
+
     def __init__(self, backbone, transformer, num_classes, num_queries, aux_loss=False):
         """ Initializes the model.
         Parameters:
@@ -86,6 +87,7 @@ class SetCriterion(nn.Module):
         1) we compute hungarian assignment between ground truth boxes and the outputs of the model
         2) we supervise each pair of matched ground-truth / prediction (supervise class and box)
     """
+
     def __init__(self, num_classes, matcher, weight_dict, eos_coef, losses):
         """ Create the criterion.
         Parameters:
@@ -310,11 +312,15 @@ def build(args):
     # you should pass `num_classes` to be 2 (max_obj_id + 1).
     # For more details on this, check the following discussion
     # https://github.com/facebookresearch/detr/issues/108#issuecomment-650269223
-    num_classes = 20 if args.dataset_file != 'coco' else 91
-    if args.dataset_file == "coco_panoptic":
-        # for panoptic, we just add a num_classes that is large enough to hold
-        # max_obj_id + 1, but the exact value doesn't really matter
-        num_classes = 250
+    # num_classes = 20 if args.dataset_file != 'coco' else 91
+    # if args.dataset_file == "coco_panoptic":
+    #     # for panoptic, we just add a num_classes that is large enough to hold
+    #     # max_obj_id + 1, but the exact value doesn't really matter
+    #     num_classes = 250
+
+    if args.dataset_file == "weed":
+        num_classes = 12
+
     device = torch.device(args.device)
 
     backbone = build_backbone(args)
