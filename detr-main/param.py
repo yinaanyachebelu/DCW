@@ -122,6 +122,9 @@ def main(trials=None):
                   }
         update_args_(args, params)
 
+    if args.output_dir:
+        Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+
     utils.init_distributed_mode(args)
     print("git:\n  {}\n".format(utils.get_sha()))
 
@@ -268,7 +271,7 @@ if __name__ == '__main__':
     # parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
     # args = parser.parse_args()
     # if args.output_dir:
-    #     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+    #Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     # main(args)
 
     study = optuna.create_study(direction="minimize")
