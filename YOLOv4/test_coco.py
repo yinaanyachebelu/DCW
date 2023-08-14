@@ -33,7 +33,7 @@ def test(data,
          imgsz=640,
          conf_thres=0.001,
          iou_thres=0.6,  # for NMS
-         save_json=False,
+         save_json=True,
          single_cls=False,
          augment=False,
          verbose=False,
