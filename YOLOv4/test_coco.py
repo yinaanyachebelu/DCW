@@ -67,7 +67,7 @@ def test(data,
             ckpt = torch.load(weights[0], map_location=device)  # load checkpoint
             ckpt['model'] = {k: v for k, v in ckpt['model'].items() if model.state_dict()[k].numel() == v.numel()}
             model.load_state_dict(ckpt['model'], strict=False)
-        except:ƒ
+        except:
             load_darknet_weights(model, weights[0])
         imgsz = check_img_size(imgsz, s=64)  # check img_size
 
