@@ -116,10 +116,10 @@ def main(trials=None):
     args = parser.parse_args()
 
     if trials is not None:
-        params = {'lr': trials.suggest_float('lr', 5e-5, 5e-4, step=1e-5),
-                  'lr_backbone': trials.suggest_float('lr_backbone', 5e-6, 5e-5, step=1e-6),
-                  'weight_decay': trials.suggest_float('weight_decay', 5e-5, 5e-4, step=1e-5),
-                  'clip_max_norm': trials.suggest_float('clip_max_norm', 0.1, 0.3, step=0.1),
+        params = {'lr': trials.suggest_float('lr', 1e-5, 1e-4, step=1e-5),
+                  'lr_backbone': trials.suggest_float('lr_backbone', 1e-6, 1e-5, step=1e-6),
+                  'weight_decay': trials.suggest_float('weight_decay', 1e-5, 1e-4, step=1e-5),
+                  'clip_max_norm': trials.suggest_float('clip_max_norm', 0.1, 0.2, step=0.1),
                   'dropout': trials.suggest_float('dropout', 0.1, 0.2, step=0.1)
                   }
         update_args_(args, params)
