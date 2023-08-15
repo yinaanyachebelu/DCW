@@ -319,7 +319,7 @@ def build(args):
     #     num_classes = 250
 
     if args.dataset_file == "weed":
-        num_classes = 12
+        num_classes = 22
 
     device = torch.device(args.device)
 

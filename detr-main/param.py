@@ -25,7 +25,7 @@ def get_args_parser():
     parser.add_argument('--lr_backbone', default=1e-5, type=float)
     parser.add_argument('--batch_size', default=2, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
-    parser.add_argument('--epochs', default=10, type=int)
+    parser.add_argument('--epochs', default=5, type=int)
     parser.add_argument('--lr_drop', default=20, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
                         help='gradient clipping max norm')
@@ -87,7 +87,7 @@ def get_args_parser():
     parser.add_argument('--coco_panoptic_path', type=str)
     parser.add_argument('--remove_difficult', action='store_true')
 
-    parser.add_argument('--output_dir', default='trials',
+    parser.add_argument('--output_dir', default='',
                         help='path where to save, empty for no saving')
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
@@ -111,13 +111,14 @@ def update_args_(args, params):  # change args in-place
 
 
 def main(trials=None):
+    best_loss = np.inf
     parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
     args = parser.parse_args()
 
     if trials is not None:
-        params = {'lr': trials.suggest_loguniform('lr', 5e-5, 5e-3),
-                  'lr_backbone': trials.suggest_loguniform('lr_backbone', 5e-6, 5e-4),
-                  'weight_decay': trials.suggest_loguniform('weight_decay', 1e-5, 1e-3),
+        params = {'lr': trials.suggest_float('lr', 5e-5, 5e-3),
+                  'lr_backbone': trials.suggest_float('lr_backbone', 5e-6, 5e-4),
+                  'weight_decay': trials.suggest_float('weight_decay', 1e-5, 1e-3),
                   'clip_max_norm': trials.suggest_float('clip_max_norm', 0.1, 0.3)
                   }
         update_args_(args, params)
@@ -220,10 +221,12 @@ def main(trials=None):
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             sampler_train.set_epoch(epoch)
+
         train_stats = train_one_epoch(
             model, criterion, data_loader_train, optimizer, device, epoch,
             args.clip_max_norm)
         lr_scheduler.step()
+
         if args.output_dir:
             checkpoint_paths = [output_dir / 'checkpoint.pth']
             # extra checkpoint before LR drop and every 100 epochs
@@ -238,9 +241,12 @@ def main(trials=None):
                     'args': args,
                 }, checkpoint_path)
 
-        test_stats, coco_evaluator = evaluate(
+        test_stats, coco_evaluator, val_loss = evaluate(
             model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
         )
+
+        if val_loss < best_loss:
+            best_loss = val_loss
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      **{f'test_{k}': v for k, v in test_stats.items()},
@@ -262,9 +268,28 @@ def main(trials=None):
                         torch.save(coco_evaluator.coco_eval["bbox"].eval,
                                    output_dir / "eval" / name)
 
+        trials.report(best_loss, epoch)
+        if trials.should_prune():
+            raise optuna.exceptions.TrialPruned()
+
+        return best_loss
+
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print('Training time {}'.format(total_time_str))
+
+
+# def objective(trial):
+#     parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
+#     args = parser.parse_args()
+#     epochs = args.epochs
+
+#     params = {''
+#               }
+
+#     val_losses = []
+#     for i in range(epochs):
+#         temp_loss = main()
 
 
 if __name__ == '__main__':
@@ -274,8 +299,9 @@ if __name__ == '__main__':
     #Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     # main(args)
 
-    study = optuna.create_study(direction="minimize")
-    study.optimize(main, n_trials=100)
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(),
+                                pruner=optuna.pruners.MedianPrune)
+    study.optimize(main, n_trials=4)
 
     print("best trial:")
     best_trial = study.best_trial
