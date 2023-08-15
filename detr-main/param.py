@@ -25,7 +25,7 @@ def get_args_parser():
     parser.add_argument('--lr_backbone', default=1e-5, type=float)
     parser.add_argument('--batch_size', default=2, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
-    parser.add_argument('--epochs', default=3, type=int)
+    parser.add_argument('--epochs', default=5, type=int)
     parser.add_argument('--lr_drop', default=20, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
                         help='gradient clipping max norm')
@@ -274,11 +274,11 @@ def main(trials=None):
         if trials.should_prune():
             raise optuna.exceptions.TrialPruned()
 
-    return best_loss
-
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print('Training time {}'.format(total_time_str))
+
+    return best_loss
 
 
 # def objective(trial):
@@ -302,7 +302,7 @@ if __name__ == '__main__':
     # main(args)
 
     study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler())
-    study.optimize(main, n_trials=3)
+    study.optimize(main, n_trials=10)
 
     print("best trial:")
     best_trial = study.best_trial
