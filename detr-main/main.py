@@ -216,7 +216,7 @@ def main(args):
                     'args': args,
                 }, checkpoint_path)
 
-        test_stats, coco_evaluator = evaluate(
+        test_stats, coco_evaluator, val_loss = evaluate(
             model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
         )
 
