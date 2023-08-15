@@ -119,7 +119,8 @@ def main(trials=None):
         params = {'lr': trials.suggest_float('lr', 5e-5, 5e-3),
                   'lr_backbone': trials.suggest_float('lr_backbone', 5e-6, 5e-4),
                   'weight_decay': trials.suggest_float('weight_decay', 1e-5, 1e-3),
-                  'clip_max_norm': trials.suggest_float('clip_max_norm', 0.1, 0.3)
+                  'clip_max_norm': trials.suggest_float('clip_max_norm', 0.1, 0.3),
+                  'dropout': trials.suggest_float('dropout', 0.1, 0.2)
                   }
         update_args_(args, params)
 
@@ -272,7 +273,7 @@ def main(trials=None):
         if trials.should_prune():
             raise optuna.exceptions.TrialPruned()
 
-        return best_loss
+    return best_loss
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
