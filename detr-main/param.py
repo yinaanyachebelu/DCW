@@ -25,7 +25,7 @@ def get_args_parser():
     parser.add_argument('--lr_backbone', default=1e-5, type=float)
     parser.add_argument('--batch_size', default=2, type=int)
     parser.add_argument('--weight_decay', default=1e-4, type=float)
-    parser.add_argument('--epochs', default=5, type=int)
+    parser.add_argument('--epochs', default=3, type=int)
     parser.add_argument('--lr_drop', default=20, type=int)
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
                         help='gradient clipping max norm')
@@ -116,11 +116,11 @@ def main(trials=None):
     args = parser.parse_args()
 
     if trials is not None:
-        params = {'lr': trials.suggest_float('lr', 5e-5, 5e-3),
-                  'lr_backbone': trials.suggest_float('lr_backbone', 5e-6, 5e-4),
-                  'weight_decay': trials.suggest_float('weight_decay', 1e-5, 1e-3),
-                  'clip_max_norm': trials.suggest_float('clip_max_norm', 0.1, 0.3),
-                  'dropout': trials.suggest_float('dropout', 0.1, 0.2)
+        params = {'lr': trials.suggest_float('lr', 5e-5, 5e-4, 1e-5),
+                  'lr_backbone': trials.suggest_float('lr_backbone', 5e-6, 5e-5, step=1e-6),
+                  'weight_decay': trials.suggest_float('weight_decay', 5e-5, 5e-4, step=1e-5),
+                  'clip_max_norm': trials.suggest_float('clip_max_norm', 0.1, 0.3, step=0.1),
+                  'dropout': trials.suggest_float('dropout', 0.1, 0.2, step=0.1)
                   }
         update_args_(args, params)
 
@@ -301,7 +301,7 @@ if __name__ == '__main__':
     # main(args)
 
     study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler())
-    study.optimize(main, n_trials=4)
+    study.optimize(main, n_trials=3)
 
     print("best trial:")
     best_trial = study.best_trial
