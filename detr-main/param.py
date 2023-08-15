@@ -299,8 +299,7 @@ if __name__ == '__main__':
     #Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     # main(args)
 
-    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(),
-                                pruner=optuna.pruners.MedianPrune)
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler())
     study.optimize(main, n_trials=4)
 
     print("best trial:")
