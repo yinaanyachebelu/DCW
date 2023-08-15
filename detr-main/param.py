@@ -202,9 +202,9 @@ def main(trials=None):
 
         del checkpoint["model"]["class_embed.weight"]
         del checkpoint["model"]["class_embed.bias"]
-        del checkpoint["model"]["query_embed.weight"]
+        #del checkpoint["model"]["query_embed.weight"]
 
-        model_without_ddp.load_state_dict(checkpoint['model'], strict=False)
+        model_without_ddp.load_state_dict(checkpoint['model'])  # add strict = False if changing num_queries
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             optimizer.load_state_dict(checkpoint['optimizer'])
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
@@ -317,4 +317,5 @@ if __name__ == '__main__':
             print("{}: {}".format(key, value))
         sys.stdout = original_stdout
 
-    optuna.visualization.plot_param_importances(study)
+    # optuna.visualization.plot_param_importances(study)
+    optuna.visualization.matplotlib.plot_param_importances(study)
