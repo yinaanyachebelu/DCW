@@ -175,7 +175,9 @@ def test(data,
             if save_json:
                 ## [{"image_id": 42, "category_id": 18, "bbox": [258.15, 41.29, 348.26, 243.78], "score": 0.236}, ...
                 
-                image_id = int(path.stem) if path.stem.isnumeric() else path.stem
+
+                #image_id = int(path.stem) if path.stem.isnumeric() else path.stem
+                image_id = si
                 box = pred[:, :4].clone()  # xyxy
                 scale_coords(img[si].shape[1:], box, shapes[si][0], shapes[si][1])  # to original shape
                 box = xyxy2xywh(box)  # xywh
