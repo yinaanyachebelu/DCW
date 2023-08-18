@@ -29,7 +29,7 @@ def load_classes(path):
 
 def test(data,
          weights=None,
-         batch_size=16,
+         batch_size=8,
          imgsz=640,
          conf_thres=0.001,
          iou_thres=0.6,  # for NMS
@@ -173,7 +173,8 @@ def test(data,
 
             # Append to pycocotools JSON dictionary
             if save_json:
-                # [{"image_id": 42, "category_id": 18, "bbox": [258.15, 41.29, 348.26, 243.78], "score": 0.236}, ...
+                ## [{"image_id": 42, "category_id": 18, "bbox": [258.15, 41.29, 348.26, 243.78], "score": 0.236}, ...
+                
                 image_id = int(path.stem) if path.stem.isnumeric() else path.stem
                 box = pred[:, :4].clone()  # xyxy
                 scale_coords(img[si].shape[1:], box, shapes[si][0], shapes[si][1])  # to original shape
@@ -257,7 +258,7 @@ def test(data,
     # Save JSON
     if save_json and len(jdict):
         w = Path(weights[0] if isinstance(weights, list) else weights).stem if weights is not None else ''  # weights
-        anno_json = glob.glob('../coco/annotations/instances_test*.json')[0]  # annotations json
+        anno_json = glob.glob('/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_test*.json')[0]  # annotations json
         pred_json = str(save_dir / f"{w}_predictions.json")  # predictions json
         print('\nEvaluating pycocotools mAP... saving %s...' % pred_json)
         with open(pred_json, 'w') as f:

@@ -281,19 +281,6 @@ def main(trials=None):
     return best_loss
 
 
-# def objective(trial):
-#     parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
-#     args = parser.parse_args()
-#     epochs = args.epochs
-
-#     params = {''
-#               }
-
-#     val_losses = []
-#     for i in range(epochs):
-#         temp_loss = main()
-
-
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
     # args = parser.parse_args()
