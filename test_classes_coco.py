@@ -6,12 +6,18 @@ pred_path = '/home/ayina/MscThesis/DCW/YOLOv4/runs/test/exp9/best_predictions.js
 
 ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
-for cat in ids:
-    Gt = COCO(ann_path)
-    dets = Gt.loadRes(pred_path)
 
-    coco_eval = COCOeval(Gt, dets, "bbox")
-    coco_eval.params.catIds = cat
-    coco_eval.evaluate()
-    coco_eval.accumulate()
-    coco_eval.summarize()
+def main():
+    for cat in ids:
+        Gt = COCO(ann_path)
+        dets = Gt.loadRes(pred_path)
+
+        coco_eval = COCOeval(Gt, dets, "bbox")
+        coco_eval.params.catIds = cat
+        coco_eval.evaluate()
+        coco_eval.accumulate()
+        coco_eval.summarize()
+
+
+if __name__ == '__main__':
+    main()
