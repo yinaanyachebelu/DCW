@@ -46,6 +46,7 @@ def main():
         results.append([cat, ap_50, ap_5095, aR])
 
     results_df = pd.DataFrame(results, columns=columns)
+    results_df.to_csv('results/yolo_classes.csv')
     print(results_df.to_string())
 
 
