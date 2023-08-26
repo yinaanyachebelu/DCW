@@ -180,11 +180,8 @@ def main(args):
         #del checkpoint["model"]["class_embed.bias"]
         #del checkpoint["model"]["query_embed.weight"]
 
-        #model_without_ddp.load_state_dict(checkpoint['model'], strict=False)
-        state_dict = model_without_ddp.state_dict()
-        for k1, k2 in zip(state_dict.keys(), checkpoint.keys()):
-            state_dict[k1] = checkpoint[k2]
-            model_without_ddp.load_state_dict(state_dict)
+        model_without_ddp.load_state_dict(checkpoint['model'], strict=False)
+
         #model_without_ddp.load_state_dict(checkpoint['state_dict'], strict=False)
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             optimizer.load_state_dict(checkpoint['optimizer'])
