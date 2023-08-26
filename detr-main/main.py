@@ -19,10 +19,10 @@ from models import build_model
 
 def get_args_parser():
     parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
-    parser.add_argument('--lr', default=2e-05, type=float)
-    parser.add_argument('--lr_backbone', default=9e-06, type=float)
+    parser.add_argument('--lr', default=1e-05, type=float)
+    parser.add_argument('--lr_backbone', default=5e-06, type=float)
     parser.add_argument('--batch_size', default=2, type=int)
-    parser.add_argument('--weight_decay', default=8e-05, type=float)
+    parser.add_argument('--weight_decay', default=5e-05, type=float)
     parser.add_argument('--epochs', default=300, type=int)
     parser.add_argument('--lr_drop', default=200, type=int)
     parser.add_argument('--clip_max_norm', default=0.2, type=float,
