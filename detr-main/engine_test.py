@@ -116,7 +116,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
             results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
 
         for i in results:
-            for v, k in i:
+            for v, k in i.items():
                 k = k.cpu().data.numpy()
 
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
