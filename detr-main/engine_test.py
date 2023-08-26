@@ -115,7 +115,13 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
             target_sizes = torch.stack([t["size"] for t in targets], dim=0)
             results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
 
+        for i in results:
+            for j in i:
+                for v, k in j:
+                    k = k.cpu().data.numpy()
+
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
+
         # for v, k in res:
         #     jdict.append({'image_id': target["image_id"].item(),
         #                 'category_id': results[""],

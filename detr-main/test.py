@@ -17,7 +17,7 @@ import torch
 import util.misc as utils
 
 from models import build_model
-from datasets.face import make_face_transforms
+from datasets.weed_coco import make_Weed_transforms
 
 import matplotlib.pyplot as plt
 import time
@@ -29,6 +29,7 @@ def box_cxcywh_to_xyxy(x):
          (x_c + 0.5 * w), (y_c + 0.5 * h)]
     return torch.stack(b, dim=1)
 
+
 def rescale_bboxes(out_bbox, size):
     img_w, img_h = size
     b = box_cxcywh_to_xyxy(out_bbox)
@@ -36,6 +37,7 @@ def rescale_bboxes(out_bbox, size):
                           img_w, img_h
                           ], dtype=torch.float32)
     return b
+
 
 def get_images(in_path):
     img_files = []
@@ -122,7 +124,7 @@ def get_args_parser():
                         help='device to use for training / testing')
     parser.add_argument('--resume', default='', help='resume from checkpoint')
 
-    parser.add_argument('--thresh', default=0.5, type=float)
+    parser.add_argument('--thresh', default=0.01, type=float)
 
     return parser
 
@@ -136,7 +138,7 @@ def infer(images_path, model, postprocessors, device, output_path):
         print("processing...{}".format(filename))
         orig_image = Image.open(img_sample)
         w, h = orig_image.size
-        transform = make_face_transforms("val")
+        transform = make_Weed_transforms("val")
         dummy_target = {
             "size": torch.as_tensor([int(h), int(w)]),
             "orig_size": torch.as_tensor([int(h), int(w)])
@@ -145,19 +147,18 @@ def infer(images_path, model, postprocessors, device, output_path):
         image = image.unsqueeze(0)
         image = image.to(device)
 
-
         conv_features, enc_attn_weights, dec_attn_weights = [], [], []
         hooks = [
             model.backbone[-2].register_forward_hook(
-                        lambda self, input, output: conv_features.append(output)
+                lambda self, input, output: conv_features.append(output)
 
             ),
             model.transformer.encoder.layers[-1].self_attn.register_forward_hook(
-                        lambda self, input, output: enc_attn_weights.append(output[1])
+                lambda self, input, output: enc_attn_weights.append(output[1])
 
             ),
             model.transformer.decoder.layers[-1].multihead_attn.register_forward_hook(
-                        lambda self, input, output: dec_attn_weights.append(output[1])
+                lambda self, input, output: dec_attn_weights.append(output[1])
 
             ),
 
@@ -200,7 +201,7 @@ def infer(images_path, model, postprocessors, device, output_path):
                 [bbox[2], bbox[1]],
                 [bbox[2], bbox[3]],
                 [bbox[0], bbox[3]],
-                ])
+            ])
             bbox = bbox.reshape((4, 2))
             cv2.polylines(img, [bbox], True, (0, 255, 0), 2)
 
