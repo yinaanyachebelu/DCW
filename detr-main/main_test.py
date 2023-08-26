@@ -190,8 +190,16 @@ def main(args):
             args.start_epoch = checkpoint['epoch'] + 1
 
     if args.eval:
-        test_stats, coco_evaluator, val_loss = evaluate(model, criterion, postprocessors,
-                                                        data_loader_val, base_ds, device, args.output_dir)
+        jdict, jdict_res = evaluate(model, criterion, postprocessors,
+                                    data_loader_val, base_ds, device, args.output_dir)
+
+        print("results")
+        print(jdict)
+        print("res")
+        print(jdict_res)
+
+        # test_stats, coco_evaluator, val_loss = evaluate(model, criterion, postprocessors,
+        #                                                 data_loader_val, base_ds, device, args.output_dir)
         if args.output_dir:
             utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return

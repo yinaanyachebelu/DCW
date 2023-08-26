@@ -86,6 +86,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
         )
 
     jdict = []
+    jdict_res = []
 
     for samples, targets in metric_logger.log_every(data_loader, 10, header):
         samples = samples.to(device)
@@ -108,64 +109,64 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
         metric_logger.update(class_error=loss_dict_reduced['class_error'])
 
         orig_target_sizes = torch.stack([t["orig_size"] for t in targets], dim=0)
-
-        print("the results")
         results = postprocessors['bbox'](outputs, orig_target_sizes)
-        print(results)
 
         if 'segm' in postprocessors.keys():
             target_sizes = torch.stack([t["size"] for t in targets], dim=0)
             results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
 
-        print("the res")
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
-        print(res)
         # for v, k in res:
         #     jdict.append({'image_id': target["image_id"].item(),
         #                 'category_id': results[""],
         #                 'bbox': [round(x, 3) for x in b],
         #                 'score': round(p[4], 5)})
 
-        if coco_evaluator is not None:
-            coco_evaluator.update(res)
+        jdict.append(results)
+        jdict_res.append(res)
 
-        if panoptic_evaluator is not None:
-            res_pano = postprocessors["panoptic"](outputs, target_sizes, orig_target_sizes)
-            for i, target in enumerate(targets):
-                image_id = target["image_id"].item()
-                file_name = f"{image_id:012d}.png"
-                res_pano[i]["image_id"] = image_id
-                res_pano[i]["file_name"] = file_name
+    return jdict, jdict_res
 
-            panoptic_evaluator.update(res_pano)
+    #     if coco_evaluator is not None:
+    #         coco_evaluator.update(res)
 
-    # gather the stats from all processes
-    metric_logger.synchronize_between_processes()
-    print("Averaged stats:", metric_logger)
+    #     if panoptic_evaluator is not None:
+    #         res_pano = postprocessors["panoptic"](outputs, target_sizes, orig_target_sizes)
+    #         for i, target in enumerate(targets):
+    #             image_id = target["image_id"].item()
+    #             file_name = f"{image_id:012d}.png"
+    #             res_pano[i]["image_id"] = image_id
+    #             res_pano[i]["file_name"] = file_name
 
-    if coco_evaluator is not None:
-        coco_evaluator.synchronize_between_processes()
-    if panoptic_evaluator is not None:
-        panoptic_evaluator.synchronize_between_processes()
+    #         panoptic_evaluator.update(res_pano)
 
-    # accumulate predictions from all images
-    if coco_evaluator is not None:
-        coco_evaluator.accumulate()
-        coco_evaluator.summarize()
-    panoptic_res = None
-    if panoptic_evaluator is not None:
-        panoptic_res = panoptic_evaluator.summarize()
+    # # gather the stats from all processes
+    # metric_logger.synchronize_between_processes()
+    # print("Averaged stats:", metric_logger)
 
-    stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
-    val_loss = stats["loss"]
+    # if coco_evaluator is not None:
+    #     coco_evaluator.synchronize_between_processes()
+    # if panoptic_evaluator is not None:
+    #     panoptic_evaluator.synchronize_between_processes()
 
-    if coco_evaluator is not None:
-        if 'bbox' in postprocessors.keys():
-            stats['coco_eval_bbox'] = coco_evaluator.coco_eval['bbox'].stats.tolist()
-        if 'segm' in postprocessors.keys():
-            stats['coco_eval_masks'] = coco_evaluator.coco_eval['segm'].stats.tolist()
-    if panoptic_res is not None:
-        stats['PQ_all'] = panoptic_res["All"]
-        stats['PQ_th'] = panoptic_res["Things"]
-        stats['PQ_st'] = panoptic_res["Stuff"]
-    return stats, coco_evaluator, val_loss
+    # # accumulate predictions from all images
+    # if coco_evaluator is not None:
+    #     coco_evaluator.accumulate()
+    #     coco_evaluator.summarize()
+    # panoptic_res = None
+    # if panoptic_evaluator is not None:
+    #     panoptic_res = panoptic_evaluator.summarize()
+
+    # stats = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
+    # val_loss = stats["loss"]
+
+    # if coco_evaluator is not None:
+    #     if 'bbox' in postprocessors.keys():
+    #         stats['coco_eval_bbox'] = coco_evaluator.coco_eval['bbox'].stats.tolist()
+    #     if 'segm' in postprocessors.keys():
+    #         stats['coco_eval_masks'] = coco_evaluator.coco_eval['segm'].stats.tolist()
+    # if panoptic_res is not None:
+    #     stats['PQ_all'] = panoptic_res["All"]
+    #     stats['PQ_th'] = panoptic_res["Things"]
+    #     stats['PQ_st'] = panoptic_res["Stuff"]
+    # return stats, coco_evaluator, val_loss
