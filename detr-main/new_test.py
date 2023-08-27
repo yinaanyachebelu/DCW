@@ -199,9 +199,9 @@ def infer(images_path, model, postprocessors, device):
         for p, b, in zip(probas, bboxes_scaled.tolist()):
             mx = p.argmax()
             jdict.append({'image_id': image_id,
-                          'category_id': mx + 1,
-                          'bbox': [round(x, 3) for x in b],
-                          'score': round(mx, 5)})
+                          'category_id': int(mx) + 1,
+                          'bbox': [round(float(x), 3) for x in b],
+                          'score': round(float(p[mx]), 5)})
 
     pred_json = "preds/predictions.json"  # predictions json
     with open(pred_json, 'w') as f:
