@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Iterable
 from PIL import Image
 import numpy as np
+import json
 
 import torch
 
@@ -123,7 +124,7 @@ def get_args_parser():
                         help='device to use for training / testing')
     parser.add_argument('--resume', default='', help='resume from checkpoint')
 
-    parser.add_argument('--thresh', default=0.01, type=float)
+    parser.add_argument('--thresh', default=0.001, type=float)
 
     return parser
 
@@ -196,18 +197,16 @@ def infer(images_path, model, postprocessors, device):
             continue
 
         for p, b, in zip(probas, bboxes_scaled.tolist()):
-            print("the pred_logit")
-            print(p)
-            print("the argmax")
-            print(p.argmax())
-            print("the box")
-            print(b)
+            mx = p.argmax()
+            jdict.append({'image_id': image_id,
+                          'category_id': mx + 1,
+                          'bbox': [round(x, 3) for x in b],
+                          'score': round(mx, 5)})
 
-        # for p, b, in zip(probas, bboxes_scaled.tolist()):
-        #     jdict.append({'image_id': image_id,
-        #                           'category_id': p.argmax(),
-        #                           'bbox': [round(x, 3) for x in b],
-        #                           'score': round(p[4], 5)})
+    save_dir = "/preds/"
+    pred_json = str(save_dir / f"predictions.json")  # predictions json
+    with open(pred_json, 'w') as f:
+        json.dump(jdict, f)
 
         #img = np.array(orig_image)
         #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
