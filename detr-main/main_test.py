@@ -190,13 +190,11 @@ def main(args):
             args.start_epoch = checkpoint['epoch'] + 1
 
     if args.eval:
-        jdict, jdict_res = evaluate(model, criterion, postprocessors,
-                                    data_loader_val, base_ds, device, args.output_dir)
+        jdict = evaluate(model, criterion, postprocessors,
+                         data_loader_val, base_ds, device, args.output_dir)
 
         print("results")
         print(jdict)
-        print("res")
-        print(jdict_res)
 
         # test_stats, coco_evaluator, val_loss = evaluate(model, criterion, postprocessors,
         #                                                 data_loader_val, base_ds, device, args.output_dir)
