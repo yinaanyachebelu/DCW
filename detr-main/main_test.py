@@ -235,7 +235,7 @@ def main(args):
                 }, checkpoint_path)
 
         test_stats, coco_evaluator, val_loss = evaluate(
-            model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
+            model, criterion, postprocessors, data_loader_test, base_ds, device, args.output_dir
         )
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
