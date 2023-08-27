@@ -112,7 +112,7 @@ def get_args_parser():
                         help="Relative classification weight of the no-object class")
 
     # dataset parameters
-    parser.add_argument('--dataset_file', default='face')
+    parser.add_argument('--dataset_file', default='weed')
     parser.add_argument('--data_path', type=str)
     parser.add_argument('--data_panoptic_path', type=str)
     parser.add_argument('--remove_difficult', action='store_true')
