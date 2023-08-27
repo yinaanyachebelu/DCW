@@ -194,8 +194,10 @@ def main(args):
                          data_loader_val, base_ds, device, args.output_dir)
 
         res = [item for sublist in jdict for item in sublist]
-        print("results")
-        print(res)
+
+        pred_json = "preds/model_predictions.json"  # predictions json
+        with open(pred_json, 'w') as f:
+            json.dump(res, f)
 
         # test_stats, coco_evaluator, val_loss = evaluate(model, criterion, postprocessors,
         #                                                 data_loader_val, base_ds, device, args.output_dir)
