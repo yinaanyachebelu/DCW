@@ -69,9 +69,9 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
                     color=[color] * 2,
                     style=['-', '--']
                 )
-    for ax, field in zip(axs, fields):
-        ax.legend([Path(p).name for p in logs])
-        ax.set_title(field)
+    # for ax, field in zip(axs, fields):
+    #     ax.legend([Path(p).name for p in logs])
+    #     ax.set_title(field)
 
 
 def plot_precision_recall(files, naming_scheme='iter'):
