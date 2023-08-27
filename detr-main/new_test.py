@@ -203,7 +203,7 @@ def infer(images_path, model, postprocessors, device):
                           'bbox': [round(x, 3) for x in b],
                           'score': round(mx, 5)})
 
-    save_dir = "/preds/"
+    save_dir = "preds/"
     pred_json = str(save_dir / f"predictions.json")  # predictions json
     with open(pred_json, 'w') as f:
         json.dump(jdict, f)
