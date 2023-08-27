@@ -55,7 +55,7 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     fig, axs = plt.subplots(ncols=len(fields), figsize=(16, 5))
 
     for df, color in zip(dfs, sns.color_palette(n_colors=len(logs))):
-        print(df.to_string())
+        df.astype('float32').dtypes
     #     for j, field in enumerate(fields):
     #         if field == 'mAP':
     #             coco_eval = pd.DataFrame(
