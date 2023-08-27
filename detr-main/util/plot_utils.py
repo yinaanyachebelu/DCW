@@ -55,22 +55,23 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     fig, axs = plt.subplots(ncols=len(fields), figsize=(16, 5))
 
     for df, color in zip(dfs, sns.color_palette(n_colors=len(logs))):
-        for j, field in enumerate(fields):
-            if field == 'mAP':
-                coco_eval = pd.DataFrame(
-                    np.stack(df.test_coco_eval_bbox.dropna().values)[:, 1]
-                ).ewm(com=ewm_col).mean()
-                axs[j].plot(coco_eval, c=color)
-            else:
-                df.interpolate().ewm(com=ewm_col).mean().plot(
-                    y=[f'train_{field}', f'test_{field}'],
-                    ax=axs[j],
-                    color=[color] * 2,
-                    style=['-', '--']
-                )
-    for ax, field in zip(axs, fields):
-        ax.legend([Path(p).name for p in logs])
-        ax.set_title(field)
+        print(df.to_string())
+    #     for j, field in enumerate(fields):
+    #         if field == 'mAP':
+    #             coco_eval = pd.DataFrame(
+    #                 np.stack(df.test_coco_eval_bbox.dropna().values)[:, 1]
+    #             ).ewm(com=ewm_col).mean()
+    #             axs[j].plot(coco_eval, c=color)
+    #         else:
+    #             df.interpolate().ewm(com=ewm_col).mean().plot(
+    #                 y=[f'train_{field}', f'test_{field}'],
+    #                 ax=axs[j],
+    #                 color=[color] * 2,
+    #                 style=['-', '--']
+    #             )
+    # for ax, field in zip(axs, fields):
+    #     ax.legend([Path(p).name for p in logs])
+    #     ax.set_title(field)
 
 
 def plot_precision_recall(files, naming_scheme='iter'):
