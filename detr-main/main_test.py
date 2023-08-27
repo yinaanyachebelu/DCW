@@ -199,11 +199,11 @@ def main(args):
 
         res = [item for sublist in jdict for item in sublist]
 
-        pred_json = "preds/model_predictions.json"  # predictions json
+        pred_json = "preds/test_predictions.json"  # predictions json
         with open(pred_json, 'w') as f:
             json.dump(res, f)
 
-        print("data saved")
+        print("DATA SAVED!!")
 
         # test_stats, coco_evaluator, val_loss = evaluate(model, criterion, postprocessors,
         #                                                 data_loader_val, base_ds, device, args.output_dir)

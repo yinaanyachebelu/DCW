@@ -4,10 +4,10 @@ import pandas as pd
 
 ann_path = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_test2017.json'
 pred_path_yolo = '/home/ayina/MscThesis/DCW/YOLOv4/runs/test/exp9/best_predictions.json'
-pred_path_detr = '/home/ayina/MscThesis/DCW/detr-main/preds/predictions.json'
+pred_path_detr = '/home/ayina/MscThesis/DCW/detr-main/preds/test_predictions.json'
 
 # testing using val set with detr
-ann_path_val = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_test2017.json'
+ann_path_val = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_val2017.json'
 pred_path_detr_val = '/home/ayina/MscThesis/DCW/detr-main/preds/model_predictions.json'
 
 columns = ['Category', 'AP50', 'AP@[0.50:0.95]', 'AR@[0.50:0.95]']
@@ -35,8 +35,8 @@ def main():
         num = id - 1
         cat = cats[num]
 
-        Gt = COCO(ann_path_val)
-        dets = Gt.loadRes(pred_path_detr_val)
+        Gt = COCO(ann_path)
+        dets = Gt.loadRes(pred_path_detr)
 
         coco_eval = COCOeval(Gt, dets, "bbox")
         coco_eval.params.catIds = id
