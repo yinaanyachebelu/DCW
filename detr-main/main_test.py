@@ -193,7 +193,7 @@ def main(args):
         jdict = evaluate(model, criterion, postprocessors,
                          data_loader_val, base_ds, device, args.output_dir)
 
-        res = jdict[0]
+        res = jdict
         print("results")
         print(res)
 
