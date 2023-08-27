@@ -3,7 +3,8 @@ from pycocotools.cocoeval import COCOeval
 import pandas as pd
 
 ann_path = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_test2017.json'
-pred_path = '/home/ayina/MscThesis/DCW/YOLOv4/runs/test/exp9/best_predictions.json'
+pred_path_yolo = '/home/ayina/MscThesis/DCW/YOLOv4/runs/test/exp9/best_predictions.json'
+pred_path_detr = '/home/ayina/MscThesis/DCW/detr-main/preds/predictions.json'
 
 columns = ['Category', 'AP50', 'AP@[0.50:0.95]', 'AR@[0.50:0.95]']
 results = []
@@ -31,7 +32,7 @@ def main():
         cat = cats[num]
 
         Gt = COCO(ann_path)
-        dets = Gt.loadRes(pred_path)
+        dets = Gt.loadRes(pred_path_detr)
 
         coco_eval = COCOeval(Gt, dets, "bbox")
         coco_eval.params.catIds = id
