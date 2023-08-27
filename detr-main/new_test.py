@@ -124,7 +124,7 @@ def get_args_parser():
                         help='device to use for training / testing')
     parser.add_argument('--resume', default='', help='resume from checkpoint')
 
-    parser.add_argument('--thresh', default=0.001, type=float)
+    parser.add_argument('--thresh', default=0.5, type=float)
 
     return parser
 

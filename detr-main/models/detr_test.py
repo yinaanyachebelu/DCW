@@ -2,6 +2,7 @@
 """
 DETR model and criterion classes.
 """
+import numpy
 import torch
 import torch.nn.functional as F
 from torch import nn
@@ -274,10 +275,7 @@ class PostProcess(nn.Module):
         assert target_sizes.shape[1] == 2
 
         prob = F.softmax(out_logits, -1)
-        prob = prob.cpu().data.numpy()
         scores, labels = prob[..., :-1].max(-1)
-        scores = scores.cpu().data.numpy()
-        labels = scores.cpu().data.numpy()
 
         # convert to [x0, y0, x1, y1] format
         boxes = box_ops.box_cxcywh_to_xyxy(out_bbox)
@@ -285,8 +283,6 @@ class PostProcess(nn.Module):
         img_h, img_w = target_sizes.unbind(1)
         scale_fct = torch.stack([img_w, img_h, img_w, img_h], dim=1)
         boxes = boxes * scale_fct[:, None, :]
-
-        boxes = boxes.cpu().data.numpy()
 
         results = [{'scores': s, 'labels': l, 'boxes': b} for s, l, b in zip(scores, labels, boxes)]
 
