@@ -127,7 +127,7 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
 
         coco_res = prepare_dets(res)
 
-        jdict.append(coco_res[0])
+        jdict.append(coco_res)
 
     return jdict
 
