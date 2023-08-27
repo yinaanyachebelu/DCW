@@ -3,7 +3,7 @@ from pathlib import Path
 
 log_directory = [Path('runs/')]
 
-fields_of_interest = ('loss','mAP',)
+fields_of_interest = ('mAP',)
 
 
 if __name__ == "__main__":
