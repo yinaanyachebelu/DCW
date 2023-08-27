@@ -10,6 +10,7 @@ from typing import Iterable
 import torch
 
 import util.misc as utils
+from datasets.coco_eval import prepare_dets
 from datasets.coco_eval import CocoEvaluator
 from datasets.panoptic_eval import PanopticEvaluator
 
@@ -73,22 +74,29 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
     metric_logger.add_meter('class_error', utils.SmoothedValue(window_size=1, fmt='{value:.2f}'))
     header = 'Test:'
 
-    iou_types = tuple(k for k in ('segm', 'bbox') if k in postprocessors.keys())
-    coco_evaluator = CocoEvaluator(base_ds, iou_types)
-    # coco_evaluator.coco_eval[iou_types[0]].params.iouThrs = [0, 0.1, 0.5, 0.75]
+    # iou_types = tuple(k for k in ('segm', 'bbox') if k in postprocessors.keys())
+    # coco_evaluator = CocoEvaluator(base_ds, iou_types)
+    # # coco_evaluator.coco_eval[iou_types[0]].params.iouThrs = [0, 0.1, 0.5, 0.75]
 
-    panoptic_evaluator = None
-    if 'panoptic' in postprocessors.keys():
-        panoptic_evaluator = PanopticEvaluator(
-            data_loader.dataset.ann_file,
-            data_loader.dataset.ann_folder,
-            output_dir=os.path.join(output_dir, "panoptic_eval"),
-        )
+    # panoptic_evaluator = None
+    # if 'panoptic' in postprocessors.keys():
+    #     panoptic_evaluator = PanopticEvaluator(
+    #         data_loader.dataset.ann_file,
+    #         data_loader.dataset.ann_folder,
+    #         output_dir=os.path.join(output_dir, "panoptic_eval"),
+    #     )
 
     jdict = []
     jdict_res = []
 
-    for samples, targets in metric_logger.log_every(data_loader, 10, header):
+    imgs = []
+    targests = []
+    img_ids = []
+
+    # for samples, targets in metric_logger.log_every(data_loader, 10, header):
+
+    for samples, targets, image_ids in data_loader:
+
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
@@ -97,16 +105,16 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
         weight_dict = criterion.weight_dict
 
         # reduce losses over all GPUs for logging purposes
-        loss_dict_reduced = utils.reduce_dict(loss_dict)
-        loss_dict_reduced_scaled = {k: v * weight_dict[k]
-                                    for k, v in loss_dict_reduced.items() if k in weight_dict}
-        loss_dict_reduced_unscaled = {f'{k}_unscaled': v
-                                      for k, v in loss_dict_reduced.items()}
+        # loss_dict_reduced = utils.reduce_dict(loss_dict)
+        # loss_dict_reduced_scaled = {k: v * weight_dict[k]
+        #                             for k, v in loss_dict_reduced.items() if k in weight_dict}
+        # loss_dict_reduced_unscaled = {f'{k}_unscaled': v
+        #                               for k, v in loss_dict_reduced.items()}
 
-        metric_logger.update(loss=sum(loss_dict_reduced_scaled.values()),
-                             **loss_dict_reduced_scaled,
-                             **loss_dict_reduced_unscaled)
-        metric_logger.update(class_error=loss_dict_reduced['class_error'])
+        # metric_logger.update(loss=sum(loss_dict_reduced_scaled.values()),
+        #                      **loss_dict_reduced_scaled,
+        #                      **loss_dict_reduced_unscaled)
+        # metric_logger.update(class_error=loss_dict_reduced['class_error'])
 
         orig_target_sizes = torch.stack([t["orig_size"] for t in targets], dim=0)
         results = postprocessors['bbox'](outputs, orig_target_sizes)
@@ -117,16 +125,11 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
 
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
 
-        # for v, k in res:
-        #     jdict.append({'image_id': target["image_id"].item(),
-        #                 'category_id': results[""],
-        #                 'bbox': [round(x, 3) for x in b],
-        #                 'score': round(p[4], 5)})
+        coco_res = prepare_dets(res)
 
-        jdict.append(results)
-        jdict_res.append(res)
+        jdict.append(coco_res)
 
-    return jdict, jdict_res
+    return jdict
 
     #     if coco_evaluator is not None:
     #         coco_evaluator.update(res)
