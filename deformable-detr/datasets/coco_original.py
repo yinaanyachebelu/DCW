@@ -112,8 +112,7 @@ class ConvertCocoPolysToMask(object):
 
         # for conversion to coco api
         area = torch.tensor([obj["area"] for obj in anno])
-        iscrowd = torch.tensor(
-            [obj["iscrowd"] if "iscrowd" in obj else 0 for obj in anno])
+        iscrowd = torch.tensor([obj["iscrowd"] if "iscrowd" in obj else 0 for obj in anno])
         target["area"] = area[keep]
         target["iscrowd"] = iscrowd[keep]
 
@@ -152,12 +151,6 @@ def make_coco_transforms(image_set):
             normalize,
         ])
 
-    if image_set == 'test':
-        return T.Compose([
-            T.RandomResize([800], max_size=1333),
-            normalize,
-        ])
-
     raise ValueError(f'unknown {image_set}')
 
 
@@ -165,11 +158,9 @@ def build(image_set, args):
     root = Path(args.coco_path)
     assert root.exists(), f'provided COCO path {root} does not exist'
     # Each key in dict below is tuple  : ( Path to images, Annotation file for those images  )
-    mode = 'instances'
     PATHS = {
-        "train": (root / "train2017", root / "annotations" / f'{mode}_train2017.json'),
-        "val": (root / "val2017", root / "annotations" / f'{mode}_val2017.json'),
-        "test": (root / "test2017", root / "annotations" / f'{mode}_test2017.json'),
+        "train": (root / "train/images", root / "train/images" / 'train.json'),
+        "val": (root / "valid/images", root / "valid/images" / 'valid.json'),
     }
 
     img_folder, ann_file = PATHS[image_set]
