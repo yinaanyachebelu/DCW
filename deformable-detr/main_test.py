@@ -22,22 +22,22 @@ import datasets
 import util.misc as utils
 import datasets.samplers as samplers
 from datasets import build_dataset, get_coco_api_from_dataset
-from engine import evaluate, train_one_epoch
+from engine_test import evaluate, train_one_epoch
 from models import build_model
 
 
 def get_args_parser():
     parser = argparse.ArgumentParser(
         'Deformable DETR Detector', add_help=False)
-    parser.add_argument('--lr', default=1.9e-4, type=float)
+    parser.add_argument('--lr', default=2e-4, type=float)
     parser.add_argument('--lr_backbone_names',
                         default=["backbone.0"], type=str, nargs='+')
-    parser.add_argument('--lr_backbone', default=1.9e-5, type=float)
+    parser.add_argument('--lr_backbone', default=2e-5, type=float)
     parser.add_argument('--lr_linear_proj_names',
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
     parser.add_argument('--lr_linear_proj_mult', default=0.1, type=float)
     parser.add_argument('--batch_size', default=4, type=int)
-    parser.add_argument('--weight_decay', default=5e-5, type=float)
+    parser.add_argument('--weight_decay', default=1e-4, type=float)
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--lr_drop', default=40, type=int)
     parser.add_argument('--lr_drop_epochs', default=None, type=int, nargs='+')
@@ -158,6 +158,7 @@ def main(args):
 
     dataset_train = build_dataset(image_set='train', args=args)
     dataset_val = build_dataset(image_set='val', args=args)
+    dataset_test = build_dataset(image_set='test', args=args)
 
     if args.distributed:
         if args.cache_mode:
@@ -171,6 +172,7 @@ def main(args):
     else:
         sampler_train = torch.utils.data.RandomSampler(dataset_train)
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+        sampler_test = torch.utils.data.SequentialSampler(dataset_test)
 
     batch_sampler_train = torch.utils.data.BatchSampler(
         sampler_train, args.batch_size, drop_last=True)
@@ -181,6 +183,8 @@ def main(args):
     data_loader_val = DataLoader(dataset_val, args.batch_size, sampler=sampler_val,
                                  drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers,
                                  pin_memory=True)
+    data_loader_test = DataLoader(dataset_test, args.batch_size, sampler=sampler_test,
+                                  drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
 
     # lr_backbone_names = ["backbone.0", "backbone.neck", "input_proj", "transformer.encoder"]
     def match_name_keywords(n, name_keywords):
@@ -228,7 +232,7 @@ def main(args):
         coco_val = datasets.coco.build("val", args)
         base_ds = get_coco_api_from_dataset(coco_val)
     else:
-        base_ds = get_coco_api_from_dataset(dataset_val)
+        base_ds = get_coco_api_from_dataset(dataset_test)
 
     if args.frozen_weights is not None:
         checkpoint = torch.load(args.frozen_weights, map_location='cpu')
@@ -244,7 +248,7 @@ def main(args):
             # LOAD WEIGHTS INTO MODEL
             checkpoint = torch.load(args.resume, map_location='cpu')
             # When number of classes changes, modify the model as well. Otherwise, keep original weights !
-            if args.num_classes != 91 or args.dataset_file != 'coco':
+            if args.num_classes != 13 or args.dataset_file != 'coco':
                 print(
                     f"Deleting last linear layer weights as num_classes is different {args.num_classes} than expected for coco (91)")
                 keys = list(checkpoint['model'].keys())
@@ -282,13 +286,23 @@ def main(args):
             args.start_epoch = checkpoint['epoch'] + 1
         # check the resumed model
         if not args.eval:
-            test_stats, coco_evaluator = evaluate(
-                model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
+            test_stats, coco_evaluator, val_loss = evaluate(
+                model, criterion, postprocessors, data_loader_test, base_ds, device, args.output_dir
             )
 
     if args.eval:
-        test_stats, coco_evaluator = evaluate(model, criterion, postprocessors,
-                                              data_loader_val, base_ds, device, args.output_dir)
+
+        jdict = evaluate(model, criterion, postprocessors,
+                         data_loader_test, base_ds, device, args.output_dir)
+
+        res = [item for sublist in jdict for item in sublist]
+
+        pred_json = "preds/test_predictions.json"  # predictions json
+        with open(pred_json, 'w') as f:
+            json.dump(res, f)
+
+        print("DATA SAVED!!")
+
         if args.output_dir:
             utils.save_on_master(
                 coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
@@ -317,8 +331,8 @@ def main(args):
                     'args': args,
                 }, checkpoint_path)
 
-        test_stats, coco_evaluator = evaluate(
-            model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
+        test_stats, coco_evaluator, val_loss = evaluate(
+            model, criterion, postprocessors, data_loader_test, base_ds, device, args.output_dir
         )
 
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},

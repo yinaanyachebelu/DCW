@@ -26,6 +26,30 @@ import pycocotools.mask as mask_util
 
 from util.misc import all_gather
 
+def prepare_dets(predictions):
+    coco_results = []
+    for original_id, prediction in predictions.items():
+        if len(prediction) == 0:
+            continue
+
+        boxes = prediction["boxes"]
+        boxes = convert_to_xywh(boxes).tolist()
+        scores = prediction["scores"].tolist()
+        labels = prediction["labels"].tolist()
+
+        coco_results.extend(
+            [
+                {
+                    "image_id": original_id,
+                    "category_id": labels[k],
+                    "bbox": box,
+                    "score": scores[k],
+                }
+                for k, box in enumerate(boxes)
+            ]
+        )
+    return coco_results
+
 
 class CocoEvaluator(object):
     def __init__(self, coco_gt, iou_types):

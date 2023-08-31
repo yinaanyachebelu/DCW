@@ -132,7 +132,7 @@ def get_args_parser():
     parser.add_argument('--cache_mode', default=False,
                         action='store_true', help='whether to cache images on memory')
     # By default, Model was trained on 91 classes
-    parser.add_argument('--num_classes', default=22, type=int)
+    parser.add_argument('--num_classes', default=13, type=int)
 
     return parser
 
