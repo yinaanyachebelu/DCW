@@ -33,7 +33,7 @@ cats = [
 
 def main():
     Gt = COCO(ann_path)
-    dets = Gt.loadRes(pred_path_deform)
+    dets = Gt.loadRes(pred_path_detr)
 
     coco_eval = COCOeval(Gt, dets, "bbox")
     coco_eval.evaluate()
