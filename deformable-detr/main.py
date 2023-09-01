@@ -261,6 +261,10 @@ def main(args):
             print('Missing Keys: {}'.format(missing_keys))
         if len(unexpected_keys) > 0:
             print('Unexpected Keys: {}'.format(unexpected_keys))
+
+        n_parameters = sum(p.numel()
+                           for p in model.parameters() if p.requires_grad)
+        print('number of params:', n_parameters)
         # import pdb; pdb.set_trace()
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             import copy
