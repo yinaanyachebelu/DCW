@@ -166,6 +166,22 @@ def prepare_viz(predictions):
     return coco_results
 
 
+class ImageFolderWithPaths(datasets.ImageFolder):
+    """Custom dataset that includes image file paths. Extends
+    torchvision.datasets.ImageFolder
+    """
+
+    # override the __getitem__ method. this is the method that dataloader calls
+    def __getitem__(self, index):
+        # this is what ImageFolder normally returns
+        original_tuple = super(ImageFolderWithPaths, self).__getitem__(index)
+        # the image file path
+        path = self.imgs[index][0]
+        # make a new tuple that includes original and the path
+        tuple_with_path = (original_tuple + (path,))
+        return tuple_with_path
+
+
 @torch.no_grad()
 def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0.8):
     model.eval()
@@ -190,8 +206,10 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         #     results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
 
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
+        print("new image")
+        print(res)
 
-        plt.imshow(samples.permute(1, 2, 0))
+        #plt.imshow(samples.permute(1, 2, 0))
         #ax = fig.add_subplot(2, 4, i + 1)
         # ax.imshow(samples)
         # for original_id, prediction in res.items():
