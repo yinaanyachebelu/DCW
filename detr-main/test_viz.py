@@ -221,28 +221,53 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         "CutleafGroundcherry"
     ]
 
-    normalize = T.Compose([
-        T.ToTensor(),
-        T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    # trans = T.Compose([
-    #     T.RandomResize([800], max_size=1333),
-    #     normalize,
-    # ])
-    trans = T.Compose([
-        T.Resize([800], max_size=1333),
-        normalize,
-    ])
-
     url = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000183.jpg'
     im = Image.open(url)
-    img = trans(im).unsqueeze(0)
-    outputs = model(img)
+
+    orig_image = Image.open(url)
+    w, h = orig_image.size
+    transform = make_Weed_transforms("test")
+    dummy_target = {
+        "size": torch.as_tensor([int(h), int(w)]),
+        "orig_size": torch.as_tensor([int(h), int(w)])
+    }
+    image, targets = transform(orig_image, dummy_target)
+    image = image.unsqueeze(0)
+    image = image.to(device)
+
+    outputs = model(image)
+
+    outputs["pred_logits"] = outputs["pred_logits"].cpu()
+    outputs["pred_boxes"] = outputs["pred_boxes"].cpu()
+
+    probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
+    # keep = probas.max(-1).values > 0.85
+    keep = probas.max(-1).values > args.thresh
+
+    bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], orig_image.size)
+    probas = probas[keep].cpu().data.numpy()
 
     probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
     keep = probas.max(-1).values > 0.9
     bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], im.size)
-    plot_results(im, probas[keep], bboxes_scaled, COLORS, CLASSES=cats)
+    plot_results(image, probas[keep], bboxes_scaled, COLORS, CLASSES=cats)
+
+    img = np.array(orig_image)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    for idx, box in enumerate(bboxes_scaled):
+        bbox = box.cpu().data.numpy()
+        bbox = bbox.astype(np.int32)
+        bbox = np.array([
+            [bbox[0], bbox[1]],
+            [bbox[2], bbox[1]],
+            [bbox[2], bbox[3]],
+            [bbox[0], bbox[3]],
+        ])
+        bbox = bbox.reshape((4, 2))
+        cv2.polylines(img, [bbox], True, (0, 255, 0), 2)
+
+        cv2.imwrite('graphics/test_graphic1.jpg', img)
 
     #imgs = get_images("/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/")
 
