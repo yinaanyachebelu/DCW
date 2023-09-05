@@ -228,7 +228,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     imgs_selected = random.sample(imgs, n)
     print(imgs_selected)
 
-    fig = plt.figure(figsize=(30, 10))
+    fig = plt.figure(figsize=(22, 10))
 
     for i, img in enumerate(imgs_selected):
 
@@ -274,12 +274,12 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
             cl = score.argmax()
             text = f'{cats[cl]}: {score[cl]:0.2f}'
             ax.text(bbox[0], bbox[1] - 20, text, fontsize=13,
-                    bbox=dict(facecolor='white', alpha=0.3))
+                    bbox=dict(facecolor='yellow', alpha=0.3))
             plt.axis('off')
 
     plt.axis('off')
     plt.show()
-    plt.savefig('graphics/plt_test_graphic_multi2.jpg',)
+    plt.savefig('graphics/plt_test_graphic_multi3.jpg',)
 
     # for idx, box in enumerate(bboxes_scaled):
     #     bbox = box.cpu().data.numpy()
