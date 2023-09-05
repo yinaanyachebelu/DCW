@@ -251,7 +251,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
     keep = probas.max(-1).values > 0.9
     bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], im.size)
-    plot_results(image, probas[keep], bboxes_scaled, COLORS, CLASSES=cats)
+    #plot_results(image, probas[keep], bboxes_scaled, COLORS, CLASSES=cats)
 
     img = np.array(orig_image)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
