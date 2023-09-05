@@ -225,8 +225,12 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         T.ToTensor(),
         T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
+    # trans = T.Compose([
+    #     T.RandomResize([800], max_size=1333),
+    #     normalize,
+    # ])
     trans = T.Compose([
-        T.RandomResize([800], max_size=1333),
+        T.Resize([800], max_size=1333),
         normalize,
     ])
 
