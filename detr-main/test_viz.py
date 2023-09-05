@@ -264,7 +264,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
                                    fill=False, color='r', linewidth=3))
         cl = score.argmax()
         text = f'{cats[cl]}: {score[cl]:0.2f}'
-        ax.text(bbox[0], bbox[1] + 10, text, fontsize=15,
+        ax.text(bbox[0], bbox[1] - 30, text, fontsize=15,
                 bbox=dict(facecolor='yellow', alpha=0.5))
 
     plt.axis('off')
