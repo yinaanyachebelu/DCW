@@ -178,7 +178,6 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     for samples, targets in data_loader:
 
         samples = samples.to(device)
-        samples = samples.tolist()
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
         outputs = model(samples)
