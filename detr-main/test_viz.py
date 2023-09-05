@@ -166,10 +166,25 @@ def prepare_viz(predictions):
     return coco_results
 
 
+def get_images(in_path):
+    img_files = []
+    for (dirpath, dirnames, filenames) in os.walk(in_path):
+        for file in filenames:
+            filename, ext = os.path.splitext(file)
+            ext = str.lower(ext)
+            if ext == '.jpg' or ext == '.jpeg' or ext == '.gif' or ext == '.png' or ext == '.pgm':
+                img_files.append(os.path.join(dirpath, file))
+
+    return img_files
+
+
 @torch.no_grad()
 def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0.8):
     model.eval()
     criterion.eval()
+
+    imgs = get_images("/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/")
+    print(imgs)
 
     #fig = plt.subplots(2, 4, figsize=(26, 17))
     fig = plt.figure(figsize=(26, 17))
@@ -191,7 +206,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
         print("new image")
-        print(res)
+        # print(res)
 
         #plt.imshow(samples.permute(1, 2, 0))
         #ax = fig.add_subplot(2, 4, i + 1)
