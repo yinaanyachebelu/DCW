@@ -385,7 +385,8 @@ def main(args):
     # NEW DATALOADER FOR TEST VIZUALIZATION
     indices = [4, 10, 75, 100, 460, 800]
     subset = torch.utils.data.Subset(dataset_test, indices)
-    data_loader_test = DataLoader(subset, args.batch_size, sampler=sampler_test,
+
+    data_loader_test = DataLoader(subset, args.batch_size, sampler=torch.utils.data.SequentialSampler(subset),
                                   drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
 
     if args.dataset_file == "coco_panoptic":
