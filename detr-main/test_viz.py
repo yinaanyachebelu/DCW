@@ -263,7 +263,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         ax.add_patch(plt.Rectangle((bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
                                    fill=False, color='r', linewidth=3))
         cl = score.argmax()
-        text = f'{cats[cl]}: {p[cl]:0.2f}'
+        text = f'{cats[cl]}: {score[cl]:0.2f}'
         ax.text(bbox[0], bbox[1], text, fontsize=15,
                 bbox=dict(facecolor='yellow', alpha=0.5))
 
