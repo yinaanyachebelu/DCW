@@ -190,23 +190,31 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
 
-        fig.add_subplot(2, 4, i + 1)
-        for original_id, prediction in res.items():
-            if len(prediction) == 0:
-                continue
+        ax = fig.add_subplot(2, 4, i + 1)
+        ax.imshow(samples)
+        # for original_id, prediction in res.items():
+        #     if len(prediction) == 0:
+        #         continue
 
-            boxes = prediction["boxes"]
-            boxes = boxes.tolist()
-            scores = prediction["scores"].tolist()
-            labels = prediction["labels"].tolist()
+        #     boxes = prediction["boxes"].tolist()
+        #     scores = prediction["scores"].tolist()
+        #     labels = prediction["labels"].tolist()
 
-            print("new image:")
-            print("boxes")
-            print(boxes)
-            print("socres")
-            print(scores)
-            print("labels")
-            print(labels)
+        #     bsl = zip(boxes, scores, labels)
+
+        #     color = (0, 0, 220)
+        #     image = cv2.rectangle(samples,
+        #                              (box[0], box[1]),
+        #                               (box[2] + b[0], b[3] + b[1]),
+        #                            color, 1)
+
+        #     print("new image:")
+        #     print("boxes")
+        #     print(boxes)
+        #     print("socres")
+        #     print(scores)
+        #     print("labels")
+        #     print(labels)
 
     #     fig.add_subplot(2, 4, i + 1)
     #     for s, l, b in results_nodict:
@@ -221,8 +229,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     #             plt.imshow(image)
     #             plt.axis('off')
 
-    # fig.tight_layout()
-    # plt.savefig("graphics/test_viz.jpg")
+    fig.tight_layout()
+    plt.savefig("graphics/test_viz.jpg")
 
     return
 
