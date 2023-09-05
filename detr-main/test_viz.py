@@ -190,7 +190,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
         res = {target['image_id'].item(): output for target, output in zip(targets, results)}
 
-        print(samples)
+        plt.imshow(samples.permute(1, 2, 0))
         #ax = fig.add_subplot(2, 4, i + 1)
         # ax.imshow(samples)
         # for original_id, prediction in res.items():
