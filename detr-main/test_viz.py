@@ -141,6 +141,31 @@ def get_args_parser():
     return parser
 
 
+def prepare_viz(predictions):
+    coco_results = []
+    for original_id, prediction in predictions.items():
+        if len(prediction) == 0:
+            continue
+
+        boxes = prediction["boxes"]
+        boxes = boxes.tolist()
+        scores = prediction["scores"].tolist()
+        labels = prediction["labels"].tolist()
+
+        coco_results.extend(
+            [
+                {
+                    "image_id": original_id,
+                    "category_id": labels[k],
+                    "bbox": box,
+                    "score": scores[k],
+                }
+                for k, box in enumerate(boxes)
+            ]
+        )
+    return coco_results
+
+
 @torch.no_grad()
 def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0.8):
     model.eval()
@@ -162,23 +187,42 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         # if 'segm' in postprocessors.keys():
         #     target_sizes = torch.stack([t["size"] for t in targets], dim=0)
         #     results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
-        #res = {target['image_id'].item(): output for target, output in zip(targets, results)}
+
+        res = {target['image_id'].item(): output for target, output in zip(targets, results)}
 
         fig.add_subplot(2, 4, i + 1)
-        for s, l, b in results_nodict:
+        for original_id, prediction in res.items():
+            if len(prediction) == 0:
+                continue
 
-            if s > thres:
-                box = b.tolist()
-                color = (0, 0, 220)  # if p>0.5 else (0,0,0)
-                image = cv2.rectangle(samples,
-                                      (box[0], box[1]),
-                                      (box[2] + b[0], b[3] + b[1]),
-                                      color, 1)
-                plt.imshow(image)
-                plt.axis('off')
+            boxes = prediction["boxes"]
+            boxes = boxes.tolist()
+            scores = prediction["scores"].tolist()
+            labels = prediction["labels"].tolist()
 
-    fig.tight_layout()
-    plt.savefig("graphics/test_viz.jpg")
+            print("new image:")
+            print("boxes")
+            print(boxes)
+            print("socres")
+            print(scores)
+            print("labels")
+            print(labels)
+
+    #     fig.add_subplot(2, 4, i + 1)
+    #     for s, l, b in results_nodict:
+
+    #         if s > thres:
+    #             box = b.tolist()
+    #             color = (0, 0, 220)  # if p>0.5 else (0,0,0)
+    #             image = cv2.rectangle(samples,
+    #                                   (box[0], box[1]),
+    #                                   (box[2] + b[0], b[3] + b[1]),
+    #                                   color, 1)
+    #             plt.imshow(image)
+    #             plt.axis('off')
+
+    # fig.tight_layout()
+    # plt.savefig("graphics/test_viz.jpg")
 
     return
 
