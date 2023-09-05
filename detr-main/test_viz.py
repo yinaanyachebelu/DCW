@@ -223,53 +223,62 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         "CutleafGroundcherry"
     ]
 
-    url = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000183.jpg'
+    n = 6
+    imgs = get_images("/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/")
+    imgs_selected = random.sample(imgs, n)
+    print(imgs_selected)
 
-    orig_image = Image.open(url)
-    w, h = orig_image.size
-    transform = make_Weed_transforms("test")
-    dummy_target = {
-        "size": torch.as_tensor([int(h), int(w)]),
-        "orig_size": torch.as_tensor([int(h), int(w)])
-    }
-    image, targets = transform(orig_image, dummy_target)
-    image = image.unsqueeze(0)
-    image = image.to(device)
+    fig = plt.figure(figsize=(30, 10))
 
-    outputs = model(image)
+    for i, img in enumerate(imgs_selected):
 
-    outputs["pred_logits"] = outputs["pred_logits"].cpu()
-    outputs["pred_boxes"] = outputs["pred_boxes"].cpu()
+        #url = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000183.jpg'
 
-    probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
-    # keep = probas.max(-1).values > 0.85
-    keep = probas.max(-1).values > thresh
+        orig_image = Image.open(img)
+        w, h = orig_image.size
+        transform = make_Weed_transforms("test")
+        dummy_target = {
+            "size": torch.as_tensor([int(h), int(w)]),
+            "orig_size": torch.as_tensor([int(h), int(w)])
+        }
+        image, targets = transform(orig_image, dummy_target)
+        image = image.unsqueeze(0)
+        image = image.to(device)
 
-    bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], orig_image.size)
-    probas = probas[keep].cpu().data.numpy()
+        outputs = model(image)
 
-    plt.figure(figsize=(8, 10))
+        outputs["pred_logits"] = outputs["pred_logits"].cpu()
+        outputs["pred_boxes"] = outputs["pred_boxes"].cpu()
 
-    img = np.array(orig_image)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    plt.imshow(img)
+        probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
+        # keep = probas.max(-1).values > 0.85
+        keep = probas.max(-1).values > thresh
 
-    ax = plt.gca()
+        bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], orig_image.size)
+        probas = probas[keep].cpu().data.numpy()
 
-    for score, box in zip(probas, bboxes_scaled):
-        bbox = box.cpu().data.numpy()
-        bbox = bbox.astype(np.int32)
+        # plotting
 
-        ax.add_patch(plt.Rectangle((bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
-                                   fill=False, color='r', linewidth=3))
-        cl = score.argmax()
-        text = f'{cats[cl]}: {score[cl]:0.2f}'
-        ax.text(bbox[0], bbox[1] - 30, text, fontsize=15,
-                bbox=dict(facecolor='yellow', alpha=0.5))
+        fig.add_subplot(2, 3, i + 1)
+        img = np.array(orig_image)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        ax = plt.gca()
+        ax.imshow(img)
+
+        for score, box in zip(probas, bboxes_scaled):
+            bbox = box.cpu().data.numpy()
+            bbox = bbox.astype(np.int32)
+
+            ax.add_patch(plt.Rectangle((bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
+                                       fill=False, color='r', linewidth=3))
+            cl = score.argmax()
+            text = f'{cats[cl]}: {score[cl]:0.2f}'
+            ax.text(bbox[0], bbox[1] - 35, text, fontsize=15,
+                    bbox=dict(facecolor='yellow', alpha=0.5))
 
     plt.axis('off')
     plt.show()
-    plt.savefig('graphics/plt_test_graphic2.jpg',)
+    plt.savefig('graphics/plt_test_graphic_multi.jpg',)
 
     # for idx, box in enumerate(bboxes_scaled):
     #     bbox = box.cpu().data.numpy()
