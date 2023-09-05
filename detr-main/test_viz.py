@@ -146,8 +146,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     model.eval()
     criterion.eval()
 
-    fig = plt.subplots(2, 4, figsize=(26, 17))
-    #fig = plt.figure(figsize=(26, 17))
+    #fig = plt.subplots(2, 4, figsize=(26, 17))
+    fig = plt.figure(figsize=(26, 17))
 
     for i, (samples, targets) in enumerate(data_loader):
 
