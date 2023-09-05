@@ -201,6 +201,7 @@ def get_images(in_path):
 def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0.8):
     model.eval()
     criterion.eval()
+    thresh = 0.9
 
     # colors for vizualization
     COLORS = [[0.000, 0.447, 0.741], [0.850, 0.325, 0.098], [0.929, 0.694, 0.125],
@@ -242,7 +243,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
     probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
     # keep = probas.max(-1).values > 0.85
-    keep = probas.max(-1).values > args.thresh
+    keep = probas.max(-1).values > thresh
 
     bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], orig_image.size)
     probas = probas[keep].cpu().data.numpy()
