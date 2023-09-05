@@ -208,6 +208,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
               [0.494, 0.184, 0.556], [0.466, 0.674, 0.188], [0.301, 0.745, 0.933]]
 
     cats = [
+        "N/A"
         "Waterhemp",
         "MorningGlory",
         "Purslane",
@@ -223,7 +224,6 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     ]
 
     url = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000183.jpg'
-    im = Image.open(url)
 
     orig_image = Image.open(url)
     w, h = orig_image.size
@@ -248,27 +248,42 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], orig_image.size)
     probas = probas[keep].cpu().data.numpy()
 
-    probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
-    keep = probas.max(-1).values > 0.9
-    bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], im.size)
-    #plot_results(image, probas[keep], bboxes_scaled, COLORS, CLASSES=cats)
+    plt.figure(figsize=(8, 10))
 
     img = np.array(orig_image)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    plt.imshow(img)
 
-    for idx, box in enumerate(bboxes_scaled):
+    ax = plt.gca()
+
+    for score, box in zip(probas, bboxes_scaled):
         bbox = box.cpu().data.numpy()
         bbox = bbox.astype(np.int32)
-        bbox = np.array([
-            [bbox[0], bbox[1]],
-            [bbox[2], bbox[1]],
-            [bbox[2], bbox[3]],
-            [bbox[0], bbox[3]],
-        ])
-        bbox = bbox.reshape((4, 2))
-        cv2.polylines(img, [bbox], True, (0, 255, 0), 2)
 
-        cv2.imwrite('graphics/test_graphic1.jpg', img)
+        ax.add_patch(plt.Rectangle((bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
+                                   fill=False, color='r', linewidth=3))
+        cl = score.argmax()
+        text = f'{cats[cl]}: {p[cl]:0.2f}'
+        ax.text(bbox[0], bbox[1], text, fontsize=15,
+                bbox=dict(facecolor='yellow', alpha=0.5))
+
+    plt.axis('off')
+    plt.show()
+    plt.savefig('graphics/plt_test_graphic.jpg',)
+
+    # for idx, box in enumerate(bboxes_scaled):
+    #     bbox = box.cpu().data.numpy()
+    #     bbox = bbox.astype(np.int32)
+    #     bbox = np.array([
+    #         [bbox[0], bbox[1]],
+    #         [bbox[2], bbox[1]],
+    #         [bbox[2], bbox[3]],
+    #         [bbox[0], bbox[3]],
+    #     ])
+    #     bbox = bbox.reshape((4, 2))
+    #     cv2.polylines(img, [bbox], True, (0, 255, 0), 2)
+
+    #     cv2.imwrite('graphics/test_graphic1.jpg', img)
 
     #imgs = get_images("/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/")
 
