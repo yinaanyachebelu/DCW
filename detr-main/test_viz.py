@@ -22,7 +22,8 @@ from models import build_model
 import datasets
 from datasets import build_dataset, get_coco_api_from_dataset
 from datasets.weed_coco import make_Weed_transforms
-import datasets.transforms as T
+#import datasets.transforms as T
+import torchvision.transforms as T
 from engine_viz import evaluate, train_one_epoch
 
 import matplotlib.pyplot as plt
@@ -232,6 +233,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     url = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000183.jpg'
     im = Image.open(url)
     img = trans(im).unsqueeze(0)
+    outputs = model(img)
 
     probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
     keep = probas.max(-1).values > 0.9
@@ -243,50 +245,50 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     #fig = plt.subplots(2, 4, figsize=(26, 17))
     #fig = plt.figure(figsize=(26, 17))
 
-    for samples, targets in data_loader:
+    # for samples, targets in data_loader:
 
-        samples = samples.to(device)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+    #     samples = samples.to(device)
+    #     targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-        outputs = model(samples)
+    #     outputs = model(samples)
 
-        orig_target_sizes = torch.stack([t["orig_size"] for t in targets], dim=0)
-        results, results_nodict = postprocessors['bbox'](outputs, orig_target_sizes)
+    #     orig_target_sizes = torch.stack([t["orig_size"] for t in targets], dim=0)
+    #     results, results_nodict = postprocessors['bbox'](outputs, orig_target_sizes)
 
-        # if 'segm' in postprocessors.keys():
-        #     target_sizes = torch.stack([t["size"] for t in targets], dim=0)
-        #     results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
+    #     # if 'segm' in postprocessors.keys():
+    #     #     target_sizes = torch.stack([t["size"] for t in targets], dim=0)
+    #     #     results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
 
-        res = {target['image_id'].item(): output for target, output in zip(targets, results)}
-        print("new image")
-        # print(res)
+    #     res = {target['image_id'].item(): output for target, output in zip(targets, results)}
+    #     print("new image")
+    # print(res)
 
-        #plt.imshow(samples.permute(1, 2, 0))
-        #ax = fig.add_subplot(2, 4, i + 1)
-        # ax.imshow(samples)
-        # for original_id, prediction in res.items():
-        #     if len(prediction) == 0:
-        #         continue
+    #plt.imshow(samples.permute(1, 2, 0))
+    #ax = fig.add_subplot(2, 4, i + 1)
+    # ax.imshow(samples)
+    # for original_id, prediction in res.items():
+    #     if len(prediction) == 0:
+    #         continue
 
-        #     boxes = prediction["boxes"].tolist()
-        #     scores = prediction["scores"].tolist()
-        #     labels = prediction["labels"].tolist()
+    #     boxes = prediction["boxes"].tolist()
+    #     scores = prediction["scores"].tolist()
+    #     labels = prediction["labels"].tolist()
 
-        #     bsl = zip(boxes, scores, labels)
+    #     bsl = zip(boxes, scores, labels)
 
-        #     color = (0, 0, 220)
-        #     image = cv2.rectangle(samples,
-        #                              (box[0], box[1]),
-        #                               (box[2] + b[0], b[3] + b[1]),
-        #                            color, 1)
+    #     color = (0, 0, 220)
+    #     image = cv2.rectangle(samples,
+    #                              (box[0], box[1]),
+    #                               (box[2] + b[0], b[3] + b[1]),
+    #                            color, 1)
 
-        #     print("new image:")
-        #     print("boxes")
-        #     print(boxes)
-        #     print("socres")
-        #     print(scores)
-        #     print("labels")
-        #     print(labels)
+    #     print("new image:")
+    #     print("boxes")
+    #     print(boxes)
+    #     print("socres")
+    #     print(scores)
+    #     print("labels")
+    #     print(labels)
 
     #     fig.add_subplot(2, 4, i + 1)
     #     for s, l, b in results_nodict:
