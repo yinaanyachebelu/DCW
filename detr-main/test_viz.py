@@ -270,15 +270,16 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
             bbox = bbox.astype(np.int32)
 
             ax.add_patch(plt.Rectangle((bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
-                                       fill=False, color='r', linewidth=3))
+                                       fill=False, color='green', linewidth=3))
             cl = score.argmax()
             text = f'{cats[cl]}: {score[cl]:0.2f}'
-            ax.text(bbox[0], bbox[1] - 35, text, fontsize=15,
-                    bbox=dict(facecolor='yellow', alpha=0.5))
+            ax.text(bbox[0], bbox[1] - 20, text, fontsize=13,
+                    bbox=dict(facecolor='white', alpha=0.3))
+            plt.axis('off')
 
     plt.axis('off')
     plt.show()
-    plt.savefig('graphics/plt_test_graphic_multi.jpg',)
+    plt.savefig('graphics/plt_test_graphic_multi2.jpg',)
 
     # for idx, box in enumerate(bboxes_scaled):
     #     bbox = box.cpu().data.numpy()
