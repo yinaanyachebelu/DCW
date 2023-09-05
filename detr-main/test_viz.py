@@ -174,24 +174,24 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     #fig = plt.subplots(2, 4, figsize=(26, 17))
     fig = plt.figure(figsize=(26, 17))
 
-    for i, batch in enumerate(data_loader):
-        for targets, samples in batch:
+    count = 0
+    for samples, targets in data_loader:
 
-            samples = list(samp.to(device) for samp in samples)
-            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        samples = list(samp.to(device) for samp in samples)
+        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-            outputs = model(samples)
+        outputs = model(samples)
 
-            orig_target_sizes = torch.stack([t["orig_size"] for t in targets], dim=0)
-            results, results_nodict = postprocessors['bbox'](outputs, orig_target_sizes)
+        orig_target_sizes = torch.stack([t["orig_size"] for t in targets], dim=0)
+        results, results_nodict = postprocessors['bbox'](outputs, orig_target_sizes)
 
         # if 'segm' in postprocessors.keys():
         #     target_sizes = torch.stack([t["size"] for t in targets], dim=0)
         #     results = postprocessors['segm'](results, outputs, orig_target_sizes, target_sizes)
 
-            res = {target['image_id'].item(): output for target, output in zip(targets, results)}
+        res = {target['image_id'].item(): output for target, output in zip(targets, results)}
 
-            plt.imshow(samples.permute(1, 2, 0))
+        plt.imshow(samples.permute(1, 2, 0))
         #ax = fig.add_subplot(2, 4, i + 1)
         # ax.imshow(samples)
         # for original_id, prediction in res.items():
@@ -383,7 +383,7 @@ def main(args):
     # NEW DATALOADER FOR TEST VIZUALIZATION
     indices = [4, 10, 75, 100, 460, 800]
     subset = torch.utils.data.Subset(dataset_test, indices)
-    data_loader_test = DataLoader(subset, args.batch_size,
+    data_loader_test = DataLoader(subset, args.batch_size, sampler=sampler_test,
                                   drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
 
     if args.dataset_file == "coco_panoptic":
