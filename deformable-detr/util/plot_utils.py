@@ -40,7 +40,8 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     if not isinstance(logs, list):
         if isinstance(logs, PurePath):
             logs = [logs]
-            print(f"{func_name} info: logs param expects a list argument, converted to list[Path].")
+            print(
+                f"{func_name} info: logs param expects a list argument, converted to list[Path].")
         else:
             raise ValueError(f"{func_name} - invalid argument for logs parameter.\n \
             Expect list[Path] or single Path obj, received {type(logs)}")
@@ -48,22 +49,25 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     # verify valid dir(s) and that every item in list is Path object
     for i, dir in enumerate(logs):
         if not isinstance(dir, PurePath):
-            raise ValueError(f"{func_name} - non-Path object in logs argument of {type(dir)}: \n{dir}")
+            raise ValueError(
+                f"{func_name} - non-Path object in logs argument of {type(dir)}: \n{dir}")
         if dir.exists():
             continue
-        raise ValueError(f"{func_name} - invalid directory in logs argument:\n{dir}")
+        raise ValueError(
+            f"{func_name} - invalid directory in logs argument:\n{dir}")
 
     # load log file(s) and plot
     dfs = [pd.read_json(Path(p) / log_name, lines=True) for p in logs]
 
     #fig, axs = plt.subplots(ncols=len(fields), figsize=(16, 5))
-    fig, axs = plt.subplots(1,2, figsize=(16, 5))
+    fig, axs = plt.subplots(1, 2, figsize=(16, 5))
 
     for df, color in zip(dfs, sns.color_palette(n_colors=len(logs))):
-    	#df = df.drop(columns=['test_coco_eval_bbox'])
+        #df = df.drop(columns=['test_coco_eval_bbox'])
         for j, field in enumerate(fields):
             if field == 'mAP':
-                coco_eval = pd.DataFrame(np.stack(df.test_coco_eval_bbox.dropna().values)[:, 1]).ewm(com=ewm_col).mean()
+                coco_eval = pd.DataFrame(np.stack(df.test_coco_eval_bbox.dropna().values)[
+                                         :, 1]).ewm(com=ewm_col).mean()
                 axs[j].plot(coco_eval, c=color)
             else:
                 df.interpolate().ewm(com=ewm_col).mean().plot(
@@ -72,11 +76,11 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
                     color=[color] * 2,
                     style=['-', '--']
                 )
-    #for ax, field in zip(axs, fields):
+    # for ax, field in zip(axs, fields):
         #ax.legend([Path(p).name for p in logs])
-        #ax.set_title(field)
-     plt.savefig('charts/map1.jpg')
-     print("image saved")
+        # ax.set_title(field)
+    plt.savefig('charts/map1.jpg')
+    print("image saved")
 
 
 def plot_precision_recall(files, naming_scheme='iter'):
@@ -113,7 +117,3 @@ def plot_precision_recall(files, naming_scheme='iter'):
     plt.savefig('charts/prec_rec.jpg')
     print("image saved")
     return fig, axs
-    
-
-
-
