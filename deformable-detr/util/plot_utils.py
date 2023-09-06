@@ -70,6 +70,7 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
                                          :, 1]).ewm(com=ewm_col).mean()
                 axs[j].plot(coco_eval, c=color)
             else:
+                df = df.drop(columns=['test_coco_eval_bbox'])
                 df.interpolate().ewm(com=ewm_col).mean().plot(
                     y=[f'train_{field}', f'test_{field}'],
                     ax=axs[j],
@@ -79,7 +80,7 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     # for ax, field in zip(axs, fields):
         #ax.legend([Path(p).name for p in logs])
         # ax.set_title(field)
-    plt.savefig('charts/map1.jpg')
+    plt.savefig('charts/map_loss1.jpg')
     print("image saved")
 
 
