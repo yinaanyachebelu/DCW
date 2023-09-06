@@ -8,4 +8,4 @@ fields_of_interest = ('mAP',)
 
 if __name__ == "__main__":
     
-    plot_logs(log_directory, fields_of_interest)
+    plot_logs(log_directory, fields = fields_of_interest)
