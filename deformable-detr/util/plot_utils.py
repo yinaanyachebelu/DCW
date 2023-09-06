@@ -76,6 +76,7 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
         ax.legend([Path(p).name for p in logs])
         ax.set_title(field)
      plt.savefig('charts/map1.jpg')
+     print("image saved")
 
 
 def plot_precision_recall(files, naming_scheme='iter'):
@@ -110,7 +111,9 @@ def plot_precision_recall(files, naming_scheme='iter'):
     axs[1].set_title('Scores / Recall')
     axs[1].legend(names)
     plt.savefig('charts/prec_rec.jpg')
+    print("image saved")
     return fig, axs
+    
 
 
 
