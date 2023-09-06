@@ -349,7 +349,15 @@ def build(args):
             aux_weight_dict.update({k + f'_{i}': v for k, v in weight_dict.items()})
         weight_dict.update(aux_weight_dict)
 
-    losses = ['labels', 'boxes', 'cardinality']
+    #losses = ['labels', 'boxes', 'cardinality']
+    alpha = 0.25  # class balance factor
+    gamma = 2.0   # focusing parameter
+    losses = {
+        'labels': {'loss': 'FocalLoss', 'alpha': alpha},
+        'boxes': {'loss': 'FocalLoss', 'alpha': alpha, 'gamma': gamma},
+        'cardinality': {'loss': 'FocalLoss', 'alpha': alpha},
+    }
+
     if args.masks:
         losses += ["masks"]
     criterion = SetCriterion(num_classes, matcher=matcher, weight_dict=weight_dict,
