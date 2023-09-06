@@ -56,7 +56,8 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     # load log file(s) and plot
     dfs = [pd.read_json(Path(p) / log_name, lines=True) for p in logs]
 
-    fig, axs = plt.subplots(ncols=len(fields), figsize=(16, 5))
+    #fig, axs = plt.subplots(ncols=len(fields), figsize=(16, 5))
+    fig, axs = plt.subplots(0,2, figsize=(16, 5))
 
     for df, color in zip(dfs, sns.color_palette(n_colors=len(logs))):
     	#df = df.drop(columns=['test_coco_eval_bbox'])
