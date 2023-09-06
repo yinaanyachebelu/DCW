@@ -78,9 +78,9 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
                     style=['-', '--']
                 )
     for ax, field in zip(axs, fields):
-        ax.legend([Path(p).name for p in logs])
+        #ax.legend([Path(p).name for p in logs])
         ax.set_title(field)
-    plt.savefig('charts/map_loss_title.jpg')
+    plt.savefig('charts/map_loss_title2.jpg')
     print("image saved")
 
 
