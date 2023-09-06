@@ -54,6 +54,7 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
 
     # load log file(s) and plot
     dfs = [pd.read_json(Path(p) / log_name, lines=True) for p in logs]
+    dfs = dfs.drop(columns=['test_coco_eval_bbox'])
 
     fig, axs = plt.subplots(ncols=len(fields), figsize=(16, 5))
 
