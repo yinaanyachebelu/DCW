@@ -105,4 +105,5 @@ def plot_precision_recall(files, naming_scheme='iter'):
     axs[0].legend(names)
     axs[1].set_title('Scores / Recall')
     axs[1].legend(names)
+    plt.savefig('charts/map1.jpg')
     return fig, axs
