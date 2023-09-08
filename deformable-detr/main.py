@@ -24,6 +24,7 @@ import datasets.samplers as samplers
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
 from models import build_model
+from models import laprop
 
 
 def get_args_parser():
@@ -215,8 +216,8 @@ def main(args):
         optimizer = torch.optim.SGD(param_dicts, lr=args.lr, momentum=0.9,
                                     weight_decay=args.weight_decay)
     elif args.laprop:
-        optimizer = torch.optim.LaProp(param_dicts, lr=args.lr,
-                                       weight_decay=args.weight_decay)
+        optimizer = laprop.LaProp(param_dicts, lr=args.lr,
+                                  weight_decay=args.weight_decay)
     else:
         optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
                                       weight_decay=args.weight_decay)
