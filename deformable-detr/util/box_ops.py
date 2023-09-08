@@ -68,6 +68,27 @@ def generalized_box_iou(boxes1, boxes2):
 
     return iou - (area - union) / area
 
+def box_diou(boxes1, boxes2):
+    iou, union = box_iou(boxes1, boxes2)
+
+    # central points of bunding boxes
+    logit_center_x = boxes1[:, 0::2].mean(dim=-1)
+    logit_center_y = boxes1[:, 1::2].mean(dim=-1)
+    label_center_x = boxes2[:, 0::2].mean(dim=-1)
+    label_center_y = boxes2[:, 1::2].mean(dim=-1)
+    center_dist = (label_center_x - logit_center_x).pow(2.) + (label_center_y - logit_center_y).pow(2.)
+
+    # diagonal length
+    lt = torch.max(boxes2[:, :2], boxes1[:, :2])
+    rb = torch.min(boxes2[:, 2:], boxes1[:, 2:])
+    diag_len = (lt - rb).pow(2.).sum(dim=-1)
+
+    # calculate diou score
+    penalty = center_dist / (diag_len)
+    diou = iou - penalty
+    
+    return diou
+
 
 def masks_to_boxes(masks):
     """Compute the bounding boxes around the provided masks

@@ -45,6 +45,7 @@ def get_args_parser():
                         help='gradient clipping max norm')
 
     parser.add_argument('--sgd', action='store_true')
+    parser.add_argument('--laprop', action='store_true')
 
     # Variants of Deformable DETR
     parser.add_argument('--with_box_refine',
@@ -213,6 +214,9 @@ def main(args):
     if args.sgd:
         optimizer = torch.optim.SGD(param_dicts, lr=args.lr, momentum=0.9,
                                     weight_decay=args.weight_decay)
+    elif args.laprop:
+        optimizer = torch.optim.LaProp(param_dicts, lr=args.lr,
+                                       weight_decay=args.weight_decay)
     else:
         optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
                                       weight_decay=args.weight_decay)
