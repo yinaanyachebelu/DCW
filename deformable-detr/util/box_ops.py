@@ -88,7 +88,7 @@ def box_diou(boxes1, boxes2):
     # diagonal length
     lt = torch.max(boxes2[:, :2], boxes1[:, :2])
     rb = torch.min(boxes2[:, 2:], boxes1[:, 2:])
-    diag_len = (rb - lt).pow(2.).sum(dim=-1)
+    diag_len = (lt - rb).pow(2.).sum(dim=-1)
 
     # calculate diou score
     penalty = center_dist / (diag_len + smooth)
