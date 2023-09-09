@@ -30,17 +30,17 @@ from models import laprop
 def get_args_parser():
     parser = argparse.ArgumentParser(
         'Deformable DETR Detector', add_help=False)
-    parser.add_argument('--lr', default=3e-4, type=float)
+    parser.add_argument('--lr', default=4e-4, type=float)
     parser.add_argument('--lr_backbone_names',
                         default=["backbone.0"], type=str, nargs='+')
-    parser.add_argument('--lr_backbone', default=3e-5, type=float)
+    parser.add_argument('--lr_backbone', default=4e-5, type=float)
     parser.add_argument('--lr_linear_proj_names',
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
-    parser.add_argument('--lr_linear_proj_mult', default=0.1, type=float)
+    parser.add_argument('--lr_linear_proj_mult', default=0.75, type=float)
     parser.add_argument('--batch_size', default=4, type=int)
     parser.add_argument('--weight_decay', default=4e-5, type=float)
     parser.add_argument('--epochs', default=50, type=int)
-    parser.add_argument('--lr_drop', default=40, type=int)
+    parser.add_argument('--lr_drop', default=10, type=int)
     parser.add_argument('--lr_drop_epochs', default=None, type=int, nargs='+')
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
                         help='gradient clipping max norm')
@@ -221,9 +221,9 @@ def main(args):
     else:
         optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
                                       weight_decay=args.weight_decay)
-    #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, T_max=50, eta_min=2e-5)
+    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
+    # lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    # optimizer, T_max=50, eta_min=2e-5)
 
     if args.distributed:
         model = torch.nn.parallel.DistributedDataParallel(
@@ -281,6 +281,7 @@ def main(args):
             #     pg['lr'] = pg_old['lr']
             #     pg['initial_lr'] = pg_old['initial_lr']
             # print(optimizer.param_groups)
+
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             # todo: this is a hack for doing experiment that resume from checkpoint and also modify lr scheduler (e.g., decrease lr in advance).
             args.override_resumed_lr_drop = True
