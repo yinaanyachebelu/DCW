@@ -30,10 +30,10 @@ from models import laprop
 def get_args_parser():
     parser = argparse.ArgumentParser(
         'Deformable DETR Detector', add_help=False)
-    parser.add_argument('--lr', default=4e-4, type=float)
+    parser.add_argument('--lr', default=3e-4, type=float)
     parser.add_argument('--lr_backbone_names',
                         default=["backbone.0"], type=str, nargs='+')
-    parser.add_argument('--lr_backbone', default=4e-5, type=float)
+    parser.add_argument('--lr_backbone', default=3e-5, type=float)
     parser.add_argument('--lr_linear_proj_names',
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
     parser.add_argument('--lr_linear_proj_mult', default=0.1, type=float)
@@ -223,7 +223,7 @@ def main(args):
                                       weight_decay=args.weight_decay)
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, T_max=50, eta_min=3e-5)
+        optimizer, T_max=50, eta_min=2e-5)
 
     if args.distributed:
         model = torch.nn.parallel.DistributedDataParallel(
