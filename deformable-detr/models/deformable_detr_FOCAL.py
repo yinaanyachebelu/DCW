@@ -271,7 +271,9 @@ class SetCriterion(nn.Module):
         # Count the number of predictions that are NOT "no-object" (which is the last class)
         card_pred = (pred_logits.argmax(-1) !=
                      pred_logits.shape[-1] - 1).sum(1)
-        card_err = F.l1_loss(card_pred.float(), tgt_lengths.float())
+        #card_err = F.l1_loss(card_pred.float(), tgt_lengths.float())
+        card_err = sigmoid_focal_loss(
+            card_pred.float(), tgt_lengths.float(), num_boxes, alpha=self.focal_alpha)
         losses = {'cardinality_error': card_err}
         return losses
 
@@ -281,19 +283,21 @@ class SetCriterion(nn.Module):
            The target boxes are expected in format (center_x, center_y, h, w), normalized by the image size.
         """
         assert 'pred_boxes' in outputs
+        #src_logits = outputs['pred_logits']
+
         idx = self._get_src_permutation_idx(indices)
         src_boxes = outputs['pred_boxes'][idx]
         target_boxes = torch.cat([t['boxes'][i]
                                  for t, (_, i) in zip(targets, indices)], dim=0)
 
         #loss_bbox = F.l1_loss(src_boxes, target_boxes, reduction='none')
-        # losses['loss_bbox'] = sigmoid_focal_loss(
-        # src_boxes, target_boxes, num_boxes, alpha=self.focal_alpha, gamma=2)
-        loss_bbox = sigmoid_focal_loss(
+        losses['loss_bbox'] = sigmoid_focal_loss(
             src_boxes, target_boxes, num_boxes, alpha=self.focal_alpha, gamma=2)
+        # loss_bbox = sigmoid_focal_loss(
+        # src_boxes, target_boxes, num_boxes, alpha=self.focal_alpha, gamma=2)
 
         losses = {}
-        losses['loss_bbox'] = loss_bbox.sum() / num_boxes
+        #losses['loss_bbox'] = loss_bbox.sum() / num_boxes
         #losses['loss_bbox'] = loss_bbox.sum()
 
         loss_giou = 1 - torch.diag(box_ops.generalized_box_iou(
