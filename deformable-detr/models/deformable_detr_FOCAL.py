@@ -271,9 +271,7 @@ class SetCriterion(nn.Module):
         # Count the number of predictions that are NOT "no-object" (which is the last class)
         card_pred = (pred_logits.argmax(-1) !=
                      pred_logits.shape[-1] - 1).sum(1)
-        #card_err = F.l1_loss(card_pred.float(), tgt_lengths.float())
-        card_err = sigmoid_focal_loss(
-            card_pred.float(), tgt_lengths.float(), num_boxes, alpha=self.focal_alpha)
+        card_err = F.l1_loss(card_pred.float(), tgt_lengths.float())
         losses = {'cardinality_error': card_err}
         return losses
 
@@ -291,14 +289,11 @@ class SetCriterion(nn.Module):
                                  for t, (_, i) in zip(targets, indices)], dim=0)
 
         #loss_bbox = F.l1_loss(src_boxes, target_boxes, reduction='none')
-        # loss_bbox = sigmoid_focal_loss(
-        # src_boxes, target_boxes, num_boxes, alpha=self.focal_alpha, gamma=2)
 
         losses = {}
         losses['loss_bbox'] = sigmoid_focal_loss(
             src_boxes, target_boxes, num_boxes, alpha=self.focal_alpha, gamma=2)
         #losses['loss_bbox'] = loss_bbox.sum() / num_boxes
-        #losses['loss_bbox'] = loss_bbox.sum()
 
         loss_giou = 1 - torch.diag(box_ops.generalized_box_iou(
             box_ops.box_cxcywh_to_xyxy(src_boxes),
