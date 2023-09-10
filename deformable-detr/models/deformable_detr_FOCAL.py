@@ -293,8 +293,8 @@ class SetCriterion(nn.Module):
             src_boxes, target_boxes, num_boxes, alpha=self.focal_alpha, gamma=2)
 
         losses = {}
-        #losses['loss_bbox'] = loss_bbox.sum() / num_boxes
-        losses['loss_bbox'] = loss_bbox.sum()
+        losses['loss_bbox'] = loss_bbox.sum() / num_boxes
+        #losses['loss_bbox'] = loss_bbox.sum()
 
         loss_giou = 1 - torch.diag(box_ops.generalized_box_iou(
             box_ops.box_cxcywh_to_xyxy(src_boxes),
