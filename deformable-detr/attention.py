@@ -202,7 +202,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
         ),
         model.transformer.encoder.layers[-1].self_attn.register_forward_hook(
-            lambda self, input, output: enc_attn_weights.append(output)
+            lambda self, input, output: enc_attn_weights.append(output[1])
 
         ),
         # model.transformer.decoder.layers[-1].multihead_attn.register_forward_hook(
@@ -272,7 +272,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     fcenter_ax = fig.add_subplot(gs[0, 0])
     fcenter_ax.imshow(orig_image)
     for (y, x) in idxs:
-        scale = orig_image.height / orig_image.shape[-2]
+        scale = orig_image.height / image.shape[-2]
         x = ((x // fact) + 0.5) * fact
         y = ((y // fact) + 0.5) * fact
         fcenter_ax.add_patch(plt.Circle(
