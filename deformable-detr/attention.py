@@ -242,8 +242,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     shape_22a = [251, 71]
     shape_22b = [16, 16]
 
-    shape_22c = [32, 71]
-    shape_22d = [8, 251]
+    shape_22c = [32, 8]
+    shape_22d = [71, 251]
 
     # and reshape the self-attention to a more interpretable shape
     sattn = enc_attn_weights[0].reshape(shape_22c + shape_22d)
