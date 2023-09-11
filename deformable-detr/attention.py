@@ -205,10 +205,10 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
             lambda self, input, output: enc_attn_weights.append(output)
 
         ),
-        # model.transformer.decoder.layers[-1].multihead_attn.register_forward_hook(
-        #lambda self, input, output: dec_attn_weights.append(output[1])
+        model.transformer.decoder.layers[-1].cross_attn.register_forward_hook(
+            lambda self, input, output: dec_attn_weights.append(output[1])
 
-        # ),
+        ),
 
     ]
 
@@ -227,12 +227,14 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         hook.remove()
 
     conv_features = conv_features[0]
-    enc_attn_weights = enc_attn_weights[0]
-    #dec_attn_weights = dec_attn_weights[0].cpu()
+    enc_attn_weights = enc_attn_weights[1][0].cpu()
+    dec_attn_weights = dec_attn_weights[1][0].cpu()
 
     f_map = conv_features['0']
     print("Encoder attention:      ", enc_attn_weights[0].shape)
     print("Feature map:            ", f_map.tensors.shape)
+    print(" ")
+    print("Decoder attention:      ", dec_attn_weights[0].shape)
 
     # get the HxW shape of the feature maps of the CNN
     #shape = f_map.tensors.shape[-2:]
@@ -242,7 +244,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     shape_22a = [251, 71]
     shape_22b = [16, 16]
     # and reshape the self-attention to a more interpretable shape
-    sattn = enc_attn_weights[0].cpu().reshape(shape_22a + shape_22b)
+    sattn = enc_attn_weights[0].reshape(shape_22a + shape_22b)
     print("Reshaped self-attention:", sattn.shape)
 
     fact = 32
