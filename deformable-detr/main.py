@@ -275,13 +275,13 @@ def main(args):
         # import pdb; pdb.set_trace()
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             import copy
-            p_groups = copy.deepcopy(optimizer.param_groups)
-            optimizer.load_state_dict(checkpoint['optimizer'])
-            for pg, pg_old in zip(optimizer.param_groups, p_groups):
-                pg['lr'] = pg_old['lr']
-                pg['initial_lr'] = pg_old['initial_lr']
-            print("new optimizer:")
-            print(optimizer.param_groups)
+            # p_groups = copy.deepcopy(optimizer.param_groups)
+            # optimizer.load_state_dict(checkpoint['optimizer'])
+            # for pg, pg_old in zip(optimizer.param_groups, p_groups):
+            #     pg['lr'] = pg_old['lr']
+            #     pg['initial_lr'] = pg_old['initial_lr']
+            # print("new optimizer:")
+            # print(optimizer.param_groups)
 
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             # todo: this is a hack for doing experiment that resume from checkpoint and also modify lr scheduler (e.g., decrease lr in advance).
