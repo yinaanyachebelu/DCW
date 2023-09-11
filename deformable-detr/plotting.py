@@ -1,7 +1,7 @@
 from util.plot_utils import plot_logs
 from pathlib import Path
 
-log_directory = [Path('runs_focal_laprop/')]
+log_directory = [Path('runs_focal_laprop_3/')]
 
 fields_of_interest = ('mAP', 'loss')
 
