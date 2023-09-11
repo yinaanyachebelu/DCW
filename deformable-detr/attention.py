@@ -236,8 +236,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
     # get the HxW shape of the feature maps of the CNN
     #shape = f_map.tensors.shape[-2:]
-    shape_22y = 89
-    shape_22x = 24
+    shape_22y = 4016
+    shape_22x = 1136
     # and reshape the self-attention to a more interpretable shape
     sattn = enc_attn_weights[0].reshape(shape_22y + shape_22x)
     print("Reshaped self-attention:", sattn.shape)
