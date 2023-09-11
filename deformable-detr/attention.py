@@ -181,8 +181,9 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     thresh = 0.9
 
     img_61 = "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000061.jpg"
+    img_22 = "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000022.jpg"
 
-    orig_image = Image.open(img_61)
+    orig_image = Image.open(img_22)
     w, h = orig_image.size
     transform = make_coco_transforms("test")
     dummy_target = {
@@ -204,10 +205,10 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
             lambda self, input, output: enc_attn_weights.append(output[1])
 
         ),
-        model.transformer.decoder.layers[-1].multihead_attn.register_forward_hook(
-            lambda self, input, output: dec_attn_weights.append(output[1])
+        # model.transformer.decoder.layers[-1].multihead_attn.register_forward_hook(
+        #lambda self, input, output: dec_attn_weights.append(output[1])
 
-        ),
+        # ),
 
     ]
 
@@ -235,7 +236,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
     # taken from FB Research DETR hands-on tutorial notebook: https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb#scrollTo=hYVZjfGhYTEa
 
-    fig, axs = plt.subplots(ncols=len(bboxes_scaled), nrows=2, figsize=(22, 7))
+    fig, axs = plt.subplots(ncols=len(bboxes_scaled),
+                            nrows=2, figsize=(22, 9.5))
     colors = COLORS * 100
     for idx, ax_i, (xmin, ymin, xmax, ymax) in zip(keep.nonzero(), axs.T, bboxes_scaled):
         ax = ax_i[0]
@@ -251,7 +253,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         ax.axis('off')
         ax.set_title(cats[probas[idx].argmax()])
     fig.tight_layout()
-    plt.savefig('graphics/61_att_enc.jpg')
+    plt.savefig('graphics/22_att_enc.jpg')
 
 
 def main(args):
