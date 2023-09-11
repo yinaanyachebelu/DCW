@@ -202,7 +202,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
         ),
         model.transformer.encoder.layers[-1].self_attn.register_forward_hook(
-            lambda self, input, output: enc_attn_weights.append(output[1])
+            lambda self, input, output: enc_attn_weights.append(output)
 
         ),
         # model.transformer.decoder.layers[-1].multihead_attn.register_forward_hook(
@@ -228,32 +228,42 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
     conv_features = conv_features[0]
     enc_attn_weights = enc_attn_weights[0]
-    dec_attn_weights = dec_attn_weights[0].cpu()
+    #dec_attn_weights = dec_attn_weights[0].cpu()
+
+    f_map = conv_features['0']
+    print("Encoder attention:      ", enc_attn_weights[0].shape)
+    print("Feature map:            ", f_map.tensors.shape)
+
+    # get the HxW shape of the feature maps of the CNN
+    shape = f_map.tensors.shape[-2:]
+    # and reshape the self-attention to a more interpretable shape
+    sattn = enc_attn_weights[0].reshape(shape + shape)
+    print("Reshaped self-attention:", sattn.shape)
 
     # visualizing attention
 
-    h, w = conv_features['0'].tensors.shape[-2:]
+    # h, w = conv_features['0'].tensors.shape[-2:]
 
-    # taken from FB Research DETR hands-on tutorial notebook: https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb#scrollTo=hYVZjfGhYTEa
+    # # taken from FB Research DETR hands-on tutorial notebook: https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb#scrollTo=hYVZjfGhYTEa
 
-    fig, axs = plt.subplots(ncols=len(bboxes_scaled),
-                            nrows=2, figsize=(22, 9.5))
-    colors = COLORS * 100
-    for idx, ax_i, (xmin, ymin, xmax, ymax) in zip(keep.nonzero(), axs.T, bboxes_scaled):
-        ax = ax_i[0]
-        ax.imshow(dec_attn_weights[0, idx].view(h, w))
-        ax.axis('off')
-        ax.set_title(f'query id: {idx.item()}')
-        ax = ax_i[1]
-        img = np.array(orig_image)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        ax.imshow(img)
-        ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
-                                   fill=False, color='blue', linewidth=3))
-        ax.axis('off')
-        ax.set_title(cats[probas[idx].argmax()])
-    fig.tight_layout()
-    plt.savefig('graphics/22_att_enc.jpg')
+    # fig, axs = plt.subplots(ncols=len(bboxes_scaled),
+    #                         nrows=2, figsize=(22, 9.5))
+    # colors = COLORS * 100
+    # for idx, ax_i, (xmin, ymin, xmax, ymax) in zip(keep.nonzero(), axs.T, bboxes_scaled):
+    #     ax = ax_i[0]
+    #     ax.imshow(dec_attn_weights[0, idx].view(h, w))
+    #     ax.axis('off')
+    #     ax.set_title(f'query id: {idx.item()}')
+    #     ax = ax_i[1]
+    #     img = np.array(orig_image)
+    #     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    #     ax.imshow(img)
+    #     ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
+    #                                fill=False, color='blue', linewidth=3))
+    #     ax.axis('off')
+    #     ax.set_title(cats[probas[idx].argmax()])
+    # fig.tight_layout()
+    # plt.savefig('graphics/22_att_enc.jpg')
 
 
 def main(args):
