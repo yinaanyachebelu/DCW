@@ -202,7 +202,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
         ),
         model.transformer.encoder.layers[-1].self_attn.register_forward_hook(
-            lambda self, input, output: enc_attn_weights.append(output[1])
+            lambda self, input, output: enc_attn_weights.append(output[0])
 
         ),
         # model.transformer.decoder.layers[-1].multihead_attn.register_forward_hook(
