@@ -15,6 +15,7 @@ import random
 import time
 from pathlib import Path
 from PIL import Image
+import cv2
 
 import numpy as np
 import torch
@@ -242,7 +243,9 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         ax.axis('off')
         ax.set_title(f'query id: {idx.item()}')
         ax = ax_i[1]
-        ax.imshow(img_61)
+        img = np.array(orig_image)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        ax.imshow(img)
         ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
                                    fill=False, color='blue', linewidth=3))
         ax.axis('off')
