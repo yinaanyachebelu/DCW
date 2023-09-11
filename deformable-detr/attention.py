@@ -227,8 +227,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         hook.remove()
 
     conv_features = conv_features[0]
-    enc_attn_weights = enc_attn_weights[1][0].cpu()
-    dec_attn_weights = dec_attn_weights[1][0].cpu()
+    enc_attn_weights = enc_attn_weights[0][1].cpu()
+    dec_attn_weights = dec_attn_weights[0][1].cpu()
 
     f_map = conv_features['0']
     print("Encoder attention:      ", enc_attn_weights[0].shape)
