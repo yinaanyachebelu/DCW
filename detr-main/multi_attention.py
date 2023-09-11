@@ -214,7 +214,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         ax.axis('off')
         ax.set_title(f'query id: {idx.item()}')
         ax = ax_i[1]
-        ax.imshow(image)
+        ax.imshow(img_61)
         ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
                                    fill=False, color='blue', linewidth=3))
         ax.axis('off')
