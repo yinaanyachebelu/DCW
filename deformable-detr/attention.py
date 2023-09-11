@@ -239,14 +239,11 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     # get the HxW shape of the feature maps of the CNN
     shape = f_map.tensors.shape[-2:]
 
-    shape_22y = 4016
-    shape_22x = 1136
-
     shape_22a = [251, 71]
     shape_22b = [16, 16]
 
-    shape_22c = [251, 16]
-    shape_22d = [71, 16]
+    shape_22c = [71, 251]
+    shape_22d = [32, 8]
 
     # and reshape the self-attention to a more interpretable shape
     sattn = enc_attn_weights[0].reshape(shape_22c + shape_22d)
@@ -285,7 +282,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         fcenter_ax.add_patch(plt.Circle(
             (x * scale, y * scale), fact // 2, color='r'))
         fcenter_ax.axis('off')
-    fig.savefig('charts/blue_att_2.jpg')
+    fig.savefig('charts/blue_att_3.jpg')
 
 #######################################################
 
