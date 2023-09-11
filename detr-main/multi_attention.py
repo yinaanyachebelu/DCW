@@ -203,10 +203,10 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     dec_attn_weights = dec_attn_weights[0].cpu()
 
     f_map = conv_features['0']
-    print("Encoder attention:      ", enc_attn_weights[0].shape)
+    print("Encoder attention:      ", enc_attn_weights.shape)
     print("Feature map:            ", f_map.tensors.shape)
     print(" ")
-    print("Decoder attention:      ", dec_attn_weights[0].shape)
+    print("Decoder attention:      ", dec_attn_weights.shape)
 
     # visualizing attention
 
