@@ -235,10 +235,47 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     print("Feature map:            ", f_map.tensors.shape)
 
     # get the HxW shape of the feature maps of the CNN
-    shape = f_map.tensors.shape[-2:]
+    #shape = f_map.tensors.shape[-2:]
+    shape_22y = 89
+    shape_22x = 24
     # and reshape the self-attention to a more interpretable shape
-    sattn = enc_attn_weights[0].reshape(shape + shape)
+    sattn = enc_attn_weights[0].reshape(shape_22y + shape_22x)
     print("Reshaped self-attention:", sattn.shape)
+
+    fact = 32
+
+    # let's select 4 reference points for visualization
+    idxs = [(200, 200), (280, 400)]
+
+    # here we create the canvas
+    fig = plt.figure(constrained_layout=True, figsize=(12, 10))
+    # and we add one plot per reference point
+    gs = fig.add_gridspec(1, 3)
+    axs = [
+        fig.add_subplot(gs[0, 1]),
+        fig.add_subplot(gs[0, 2])
+    ]
+
+    # for each one of the reference points, let's plot the self-attention
+    # for that point
+    for idx_o, ax in zip(idxs, axs):
+        idx = (idx_o[0] // fact, idx_o[1] // fact)
+        ax.imshow(sattn[..., idx[0], idx[1]],
+                  cmap='cividis', interpolation='nearest')
+        ax.axis('off')
+        ax.set_title(f'self-attention{idx_o}')
+
+    # and now let's add the central image, with the reference points as red circles
+    fcenter_ax = fig.add_subplot(gs[0, 0])
+    fcenter_ax.imshow(orig_image)
+    for (y, x) in idxs:
+        scale = orig_image.height / orig_image.shape[-2]
+        x = ((x // fact) + 0.5) * fact
+        y = ((y // fact) + 0.5) * fact
+        fcenter_ax.add_patch(plt.Circle(
+            (x * scale, y * scale), fact // 2, color='r'))
+        fcenter_ax.axis('off')
+    plt.savefig('graphics/blue_att.jpg')
 
     # visualizing attention
 
