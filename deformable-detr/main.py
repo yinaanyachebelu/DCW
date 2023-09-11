@@ -38,7 +38,7 @@ def get_args_parser():
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
     parser.add_argument('--lr_linear_proj_mult', default=0.7, type=float)
     parser.add_argument('--batch_size', default=4, type=int)
-    parser.add_argument('--weight_decay', default=5e-5, type=float)
+    parser.add_argument('--weight_decay', default=4e-5, type=float)
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--lr_drop', default=40, type=int)
     parser.add_argument('--lr_drop_epochs', default=None, type=int, nargs='+')
@@ -275,12 +275,13 @@ def main(args):
         # import pdb; pdb.set_trace()
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             import copy
-            # p_groups = copy.deepcopy(optimizer.param_groups)
-            # optimizer.load_state_dict(checkpoint['optimizer'])
-            # for pg, pg_old in zip(optimizer.param_groups, p_groups):
-            #     pg['lr'] = pg_old['lr']
-            #     pg['initial_lr'] = pg_old['initial_lr']
-            # print(optimizer.param_groups)
+            p_groups = copy.deepcopy(optimizer.param_groups)
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            for pg, pg_old in zip(optimizer.param_groups, p_groups):
+                pg['lr'] = pg_old['lr']
+                pg['initial_lr'] = pg_old['initial_lr']
+            print("new optimizer:")
+            print(optimizer.param_groups)
 
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             # todo: this is a hack for doing experiment that resume from checkpoint and also modify lr scheduler (e.g., decrease lr in advance).
