@@ -87,11 +87,6 @@ def evaluate(model, criterion, postprocessors, data_loader, base_ds, device, out
     #     )
 
     jdict = []
-    jdict_res = []
-
-    imgs = []
-    targests = []
-    img_ids = []
 
     # for samples, targets in metric_logger.log_every(data_loader, 10, header):
 

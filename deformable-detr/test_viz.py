@@ -24,7 +24,7 @@ from datasets import build_dataset, get_coco_api_from_dataset
 from datasets.weed_coco import make_Weed_transforms
 #import datasets.transforms as T
 import torchvision.transforms as T
-from engine_viz import evaluate, train_one_epoch
+from engine_test import evaluate, train_one_epoch
 
 import matplotlib.pyplot as plt
 import time
@@ -76,7 +76,8 @@ def get_images(in_path):
 
 
 def get_args_parser():
-    parser = argparse.ArgumentParser('Set transformer detector', add_help=False)
+    parser = argparse.ArgumentParser(
+        'Set transformer detector', add_help=False)
     parser.add_argument('--lr', default=1e-05, type=float)
     parser.add_argument('--lr_backbone', default=5e-06, type=float)
     parser.add_argument('--batch_size', default=2, type=int)
@@ -147,7 +148,8 @@ def get_args_parser():
     parser.add_argument('--device', default='cuda',
                         help='device to use for training / testing')
     parser.add_argument('--seed', default=42, type=int)
-    parser.add_argument('--resume', default='runs2/checkpoint.pth', help='resume from checkpoint')
+    parser.add_argument(
+        '--resume', default='runs2/checkpoint.pth', help='resume from checkpoint')
     parser.add_argument('--start_epoch', default=0, type=int, metavar='N',
                         help='start epoch')
     parser.add_argument('--eval', action='store_true')
@@ -156,7 +158,8 @@ def get_args_parser():
     # distributed training parameters
     parser.add_argument('--world_size', default=1, type=int,
                         help='number of distributed processes')
-    parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
+    parser.add_argument('--dist_url', default='env://',
+                        help='url used to set up distributed training')
     return parser
 
 
@@ -224,7 +227,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     ]
 
     n = 6
-    imgs = get_images("/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/")
+    imgs = get_images(
+        "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/")
     imgs_selected = random.sample(imgs, n)
     print(imgs_selected)
 
@@ -254,7 +258,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         # keep = probas.max(-1).values > 0.85
         keep = probas.max(-1).values > thresh
 
-        bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0, keep], orig_image.size)
+        bboxes_scaled = rescale_bboxes(
+            outputs['pred_boxes'][0, keep], orig_image.size)
         probas = probas[keep].cpu().data.numpy()
 
         # plotting
@@ -471,13 +476,16 @@ def main(args):
 
     model_without_ddp = model
     if args.distributed:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
+        model = torch.nn.parallel.DistributedDataParallel(
+            model, device_ids=[args.gpu])
         model_without_ddp = model.module
-    n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    n_parameters = sum(p.numel()
+                       for p in model.parameters() if p.requires_grad)
     print('number of params:', n_parameters)
 
     param_dicts = [
-        {"params": [p for n, p in model_without_ddp.named_parameters() if "backbone" not in n and p.requires_grad]},
+        {"params": [p for n, p in model_without_ddp.named_parameters(
+        ) if "backbone" not in n and p.requires_grad]},
         {
             "params": [p for n, p in model_without_ddp.named_parameters() if "backbone" in n and p.requires_grad],
             "lr": args.lr_backbone,
@@ -548,14 +556,16 @@ def main(args):
     args.eval = True
     if args.eval:
 
-        evaluate_test(model, criterion, postprocessors, data_loader_test, device, thres=0.8)
+        evaluate_test(model, criterion, postprocessors,
+                      data_loader_test, device, thres=0.8)
 
         print("IMAGE SAVED!!")
 
         # test_stats, coco_evaluator, val_loss = evaluate(model, criterion, postprocessors,
         #                                                 data_loader_val, base_ds, device, args.output_dir)
         if args.output_dir:
-            utils.save_on_master(coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
+            utils.save_on_master(
+                coco_evaluator.coco_eval["bbox"].eval, output_dir / "eval.pth")
         return
 
     print("Start training")
@@ -571,7 +581,8 @@ def main(args):
             checkpoint_paths = [output_dir / 'checkpoint.pth']
             # extra checkpoint before LR drop and every 100 epochs
             if (epoch + 1) % args.lr_drop == 0 or (epoch + 1) % 100 == 0:
-                checkpoint_paths.append(output_dir / f'checkpoint{epoch:04}.pth')
+                checkpoint_paths.append(
+                    output_dir / f'checkpoint{epoch:04}.pth')
             for checkpoint_path in checkpoint_paths:
                 utils.save_on_master({
                     'model': model_without_ddp.state_dict(),
@@ -588,7 +599,8 @@ def main(args):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser('DETR training and evaluation script', parents=[get_args_parser()])
+    parser = argparse.ArgumentParser(
+        'DETR training and evaluation script', parents=[get_args_parser()])
     args = parser.parse_args()
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
