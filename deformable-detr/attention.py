@@ -278,7 +278,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         fcenter_ax.add_patch(plt.Circle(
             (x * scale, y * scale), fact // 2, color='r'))
         fcenter_ax.axis('off')
-    fig.savefig('graphics/blue_att.jpg')
+    fig.savefig('charts/blue_att.jpg')
 
     # visualizing attention
 
