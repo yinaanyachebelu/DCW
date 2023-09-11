@@ -228,8 +228,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
     conv_features = conv_features[0]
     enc_attn_weights = enc_attn_weights[0].cpu()
-    #dec_attn_weights = dec_attn_weights[0].cpu()
-    dec_attn_weights = dec_attn_weights.cpu()
+    dec_attn_weights = dec_attn_weights[0].cpu()
 
     f_map = conv_features['0']
     print("Encoder attention:      ", enc_attn_weights[0].shape)
@@ -253,40 +252,40 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     sattn = enc_attn_weights[0].reshape(shape_22c + shape_22d)
     print("Reshaped self-attention:", sattn.shape)
 
-    # fact = 32
+    fact = 32
 
-    # # let's select 4 reference points for visualization
-    # idxs = [(200, 200), (280, 400)]
+    # let's select 4 reference points for visualization
+    idxs = [(200, 200), (280, 400)]
 
-    # # here we create the canvas
-    # fig = plt.figure(constrained_layout=True, figsize=(12, 10))
-    # # and we add one plot per reference point
-    # gs = fig.add_gridspec(1, 3)
-    # axs = [
-    #     fig.add_subplot(gs[0, 1]),
-    #     fig.add_subplot(gs[0, 2])
-    # ]
+    # here we create the canvas
+    fig = plt.figure(constrained_layout=True, figsize=(12, 10))
+    # and we add one plot per reference point
+    gs = fig.add_gridspec(1, 3)
+    axs = [
+        fig.add_subplot(gs[0, 1]),
+        fig.add_subplot(gs[0, 2])
+    ]
 
     # for each one of the reference points, let's plot the self-attention
 
-    # for idx_o, ax in zip(idxs, axs):
-    #     idx = (idx_o[0] // fact, idx_o[1] // fact)
-    #     ax.imshow(sattn[..., idx[0], idx[1]],
-    #               cmap='cividis', interpolation='nearest')
-    #     ax.axis('off')
-    #     ax.set_title(f'self-attention{idx_o}')
+    for idx_o, ax in zip(idxs, axs):
+        idx = (idx_o[0] // fact, idx_o[1] // fact)
+        ax.imshow(sattn[..., idx[0], idx[1]],
+                  cmap='cividis', interpolation='nearest')
+        ax.axis('off')
+        ax.set_title(f'self-attention{idx_o}')
 
-    # # and now let's add the central image, with the reference points as red circles
-    # fcenter_ax = fig.add_subplot(gs[0, 0])
-    # fcenter_ax.imshow(orig_image)
-    # for (y, x) in idxs:
-    #     scale = orig_image.height / image.shape[-2]
-    #     x = ((x // fact) + 0.5) * fact
-    #     y = ((y // fact) + 0.5) * fact
-    #     fcenter_ax.add_patch(plt.Circle(
-    #         (x * scale, y * scale), fact // 2, color='r'))
-    #     fcenter_ax.axis('off')
-    # # fig.savefig('charts/blue_att.jpg')
+    # and now let's add the central image, with the reference points as red circles
+    fcenter_ax = fig.add_subplot(gs[0, 0])
+    fcenter_ax.imshow(orig_image)
+    for (y, x) in idxs:
+        scale = orig_image.height / image.shape[-2]
+        x = ((x // fact) + 0.5) * fact
+        y = ((y // fact) + 0.5) * fact
+        fcenter_ax.add_patch(plt.Circle(
+            (x * scale, y * scale), fact // 2, color='r'))
+        fcenter_ax.axis('off')
+    fig.savefig('charts/blue_att_2.jpg')
 
 #######################################################
 
@@ -294,26 +293,26 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
     # # taken from FB Research DETR hands-on tutorial notebook: https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb#scrollTo=hYVZjfGhYTEa
 
-    h, w = conv_features['0'].tensors.shape[-2:]
+    # h, w = conv_features['0'].tensors.shape[-2:]
 
-    fig, axs = plt.subplots(ncols=len(bboxes_scaled),
-                            nrows=2, figsize=(22, 9.5))
-    colors = COLORS * 100
-    for idx, ax_i, (xmin, ymin, xmax, ymax) in zip(keep.nonzero(), axs.T, bboxes_scaled):
-        ax = ax_i[0]
-        ax.imshow(dec_attn_weights[0, idx].view(h, w))
-        ax.axis('off')
-        ax.set_title(f'query id: {idx.item()}')
-        ax = ax_i[1]
-        img = np.array(orig_image)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        ax.imshow(img)
-        ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
-                                   fill=False, color='blue', linewidth=3))
-        ax.axis('off')
-        ax.set_title(cats[probas[idx].argmax()])
-    fig.tight_layout()
-    plt.savefig('charts/22_att_deform.jpg')
+    # fig, axs = plt.subplots(ncols=len(bboxes_scaled),
+    #                         nrows=2, figsize=(22, 9.5))
+    # colors = COLORS * 100
+    # for idx, ax_i, (xmin, ymin, xmax, ymax) in zip(keep.nonzero(), axs.T, bboxes_scaled):
+    #     ax = ax_i[0]
+    #     ax.imshow(dec_attn_weights[0, idx].view(h, w))
+    #     ax.axis('off')
+    #     ax.set_title(f'query id: {idx.item()}')
+    #     ax = ax_i[1]
+    #     img = np.array(orig_image)
+    #     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    #     ax.imshow(img)
+    #     ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
+    #                                fill=False, color='blue', linewidth=3))
+    #     ax.axis('off')
+    #     ax.set_title(cats[probas[idx].argmax()])
+    # fig.tight_layout()
+    # plt.savefig('charts/22_att_deform.jpg')
 
 
 def main(args):
