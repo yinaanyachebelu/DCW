@@ -160,31 +160,6 @@ def get_args_parser():
     return parser
 
 
-def prepare_viz(predictions):
-    coco_results = []
-    for original_id, prediction in predictions.items():
-        if len(prediction) == 0:
-            continue
-
-        boxes = prediction["boxes"]
-        boxes = boxes.tolist()
-        scores = prediction["scores"].tolist()
-        labels = prediction["labels"].tolist()
-
-        coco_results.extend(
-            [
-                {
-                    "image_id": original_id,
-                    "category_id": labels[k],
-                    "bbox": box,
-                    "score": scores[k],
-                }
-                for k, box in enumerate(boxes)
-            ]
-        )
-    return coco_results
-
-
 def get_images(in_path):
     img_files = []
     for (dirpath, dirnames, filenames) in os.walk(in_path):

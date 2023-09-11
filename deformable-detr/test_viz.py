@@ -545,6 +545,7 @@ def main(args):
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
             args.start_epoch = checkpoint['epoch'] + 1
 
+    args.eval = True
     if args.eval:
 
         evaluate_test(model, criterion, postprocessors, data_loader_test, device, thres=0.8)

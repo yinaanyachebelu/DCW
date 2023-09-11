@@ -14,6 +14,7 @@ import json
 import random
 import time
 from pathlib import Path
+from PIL import Image
 
 import numpy as np
 import torch
@@ -24,6 +25,45 @@ import datasets.samplers as samplers
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine_test import evaluate, train_one_epoch
 from models import build_model
+import matplotlib.pyplot as plt
+import torchvision.transforms as T
+from datasets.coco import make_coco_transforms
+
+
+def box_cxcywh_to_xyxy(x):
+    x_c, y_c, w, h = x.unbind(1)
+    b = [(x_c - 0.5 * w), (y_c - 0.5 * h),
+         (x_c + 0.5 * w), (y_c + 0.5 * h)]
+    return torch.stack(b, dim=1)
+
+
+def rescale_bboxes(out_bbox, size):
+    img_w, img_h = size
+    b = box_cxcywh_to_xyxy(out_bbox)
+    b = b * torch.tensor([img_w, img_h,
+                          img_w, img_h
+                          ], dtype=torch.float32)
+    return b
+
+
+COLORS = [[0.000, 0.447, 0.741], [0.850, 0.325, 0.098], [0.929, 0.694, 0.125],
+          [0.494, 0.184, 0.556], [0.466, 0.674, 0.188], [0.301, 0.745, 0.933]]
+
+cats = [
+    "N/A"
+    "Waterhemp",
+    "MorningGlory",
+    "Purslane",
+    "SpottedSpurge",
+    "Carpetweed",
+    "Ragweed",
+    "Eclipta",
+    "PricklySida",
+    "PalmerAmaranth",
+    "Sicklepod",
+    "Goosegrass",
+    "CutleafGroundcherry"
+]
 
 
 def get_args_parser():
@@ -131,6 +171,84 @@ def get_args_parser():
     parser.add_argument('--num_classes', default=13, type=int)
 
     return parser
+
+
+@torch.no_grad()
+def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0.8):
+    model.eval()
+    criterion.eval()
+    thresh = 0.9
+
+    img_61 = "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000061.jpg"
+
+    orig_image = Image.open(img_61)
+    w, h = orig_image.size
+    transform = make_coco_transforms("test")
+    dummy_target = {
+        "size": torch.as_tensor([int(h), int(w)]),
+        "orig_size": torch.as_tensor([int(h), int(w)])
+    }
+    image, targets = transform(orig_image, dummy_target)
+    image = image.unsqueeze(0)
+    image = image.to(device)
+
+    # using hooks to extract attention weights
+    conv_features, enc_attn_weights, dec_attn_weights = [], [], []
+    hooks = [
+        model.backbone[-2].register_forward_hook(
+            lambda self, input, output: conv_features.append(output)
+
+        ),
+        model.transformer.encoder.layers[-1].self_attn.register_forward_hook(
+            lambda self, input, output: enc_attn_weights.append(output[1])
+
+        ),
+        model.transformer.decoder.layers[-1].multihead_attn.register_forward_hook(
+            lambda self, input, output: dec_attn_weights.append(output[1])
+
+        ),
+
+    ]
+
+    outputs = model(image)
+
+    outputs["pred_logits"] = outputs["pred_logits"].cpu()
+    outputs["pred_boxes"] = outputs["pred_boxes"].cpu()
+
+    probas = outputs['pred_logits'].softmax(-1)[0, :, :-1]
+    keep = probas.max(-1).values > thresh
+
+    bboxes_scaled = rescale_bboxes(
+        outputs['pred_boxes'][0, keep], orig_image.size)
+
+    for hook in hooks:
+        hook.remove()
+
+    conv_features = conv_features[0]
+    enc_attn_weights = enc_attn_weights[0]
+    dec_attn_weights = dec_attn_weights[0].cpu()
+
+    # visualizing attention
+
+    h, w = conv_features['0'].tensors.shape[-2:]
+
+    # taken from FB Research DETR hands-on tutorial notebook: https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb#scrollTo=hYVZjfGhYTEa
+
+    fig, axs = plt.subplots(ncols=len(bboxes_scaled), nrows=2, figsize=(22, 7))
+    colors = COLORS * 100
+    for idx, ax_i, (xmin, ymin, xmax, ymax) in zip(keep.nonzero(), axs.T, bboxes_scaled):
+        ax = ax_i[0]
+        ax.imshow(dec_attn_weights[0, idx].view(h, w))
+        ax.axis('off')
+        ax.set_title(f'query id: {idx.item()}')
+        ax = ax_i[1]
+        ax.imshow(im)
+        ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
+                                   fill=False, color='blue', linewidth=3))
+        ax.axis('off')
+        ax.set_title(cats[probas[idx].argmax()])
+    fig.tight_layout()
+    plt.savefig('graphics/61_att_enc.jpg')
 
 
 def main(args):
@@ -289,19 +407,13 @@ def main(args):
             test_stats, coco_evaluator, val_loss = evaluate(
                 model, criterion, postprocessors, data_loader_test, base_ds, device, args.output_dir
             )
-
+    args.eval = True
     if args.eval:
 
-        jdict = evaluate(model, criterion, postprocessors,
-                         data_loader_test, base_ds, device, args.output_dir)
+        evaluate_test(model, criterion, postprocessors,
+                      data_loader_test, device, thres=0.8)
 
-        res = [item for sublist in jdict for item in sublist]
-
-        pred_json = "preds/test_predictions.json"  # predictions json
-        with open(pred_json, 'w') as f:
-            json.dump(res, f)
-
-        print("DATA SAVED!!")
+        print("IMAGE SAVED!!")
 
         if args.output_dir:
             utils.save_on_master(
@@ -335,33 +447,35 @@ def main(args):
             model, criterion, postprocessors, data_loader_test, base_ds, device, args.output_dir
         )
 
-        log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
-                     **{f'test_{k}': v for k, v in test_stats.items()},
-                     'epoch': epoch,
-                     'n_parameters': n_parameters}
+    #     log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
+    #                  **{f'test_{k}': v for k, v in test_stats.items()},
+    #                  'epoch': epoch,
+    #                  'n_parameters': n_parameters}
 
-        if args.output_dir and utils.is_main_process():
-            with (output_dir / "log.txt").open("a") as f:
-                f.write(json.dumps(log_stats) + "\n")
+    #     if args.output_dir and utils.is_main_process():
+    #         with (output_dir / "log.txt").open("a") as f:
+    #             f.write(json.dumps(log_stats) + "\n")
 
-            # for evaluation logs
-            if coco_evaluator is not None:
-                (output_dir / 'eval').mkdir(exist_ok=True)
-                if "bbox" in coco_evaluator.coco_eval:
-                    filenames = ['latest.pth']
-                    if epoch % 50 == 0:
-                        filenames.append(f'{epoch:03}.pth')
-                    for name in filenames:
-                        torch.save(coco_evaluator.coco_eval["bbox"].eval,
-                                   output_dir / "eval" / name)
+    #         # for evaluation logs
+    #         if coco_evaluator is not None:
+    #             (output_dir / 'eval').mkdir(exist_ok=True)
+    #             if "bbox" in coco_evaluator.coco_eval:
+    #                 filenames = ['latest.pth']
+    #                 if epoch % 50 == 0:
+    #                     filenames.append(f'{epoch:03}.pth')
+    #                 for name in filenames:
+    #                     torch.save(coco_evaluator.coco_eval["bbox"].eval,
+    #                                output_dir / "eval" / name)
 
-    total_time = time.time() - start_time
-    total_time_str = str(datetime.timedelta(seconds=int(total_time)))
-    print('Training time {}'.format(total_time_str))
+    # total_time = time.time() - start_time
+    # total_time_str = str(time.timedelta(seconds=int(total_time)))
+    # print('Training time {}'.format(total_time_str))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        'Deformable DETR training and evaluation script', parents=[get_args_parser()])
+        'DETR training and evaluation script', parents=[get_args_parser()])
     args = parser.parse_args()
+    if args.output_dir:
+        Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     main(args)
