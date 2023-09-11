@@ -242,7 +242,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     shape_22a = [251, 71]
     shape_22b = [16, 16]
     # and reshape the self-attention to a more interpretable shape
-    sattn = enc_attn_weights[0].reshape(shape_22a + shape_22b)
+    sattn = enc_attn_weights[0].cpu().reshape(shape_22a + shape_22b)
     print("Reshaped self-attention:", sattn.shape)
 
     fact = 32
