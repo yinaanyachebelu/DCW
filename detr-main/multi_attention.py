@@ -150,7 +150,7 @@ def get_args_parser():
 def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0.8):
     model.eval()
     criterion.eval()
-    thresh = 0.9
+    thresh = 0.75
 
     img_61 = "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000061.jpg"
 
@@ -207,7 +207,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
     # taken from FB Research DETR hands-on tutorial notebook: https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb#scrollTo=hYVZjfGhYTEa
 
-    fig, axs = plt.subplots(ncols=len(bboxes_scaled), nrows=2, figsize=(22, 7))
+    fig, axs = plt.subplots(ncols=len(bboxes_scaled), nrows=2, figsize=(10, 10))
     colors = COLORS * 100
     for idx, ax_i, (xmin, ymin, xmax, ymax) in zip(keep.nonzero(), axs.T, bboxes_scaled):
         ax = ax_i[0]
