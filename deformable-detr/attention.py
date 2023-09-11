@@ -291,9 +291,9 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
     # visualizing attention
 
-    # h, w = conv_features['0'].tensors.shape[-2:]
-
     # # taken from FB Research DETR hands-on tutorial notebook: https://colab.research.google.com/github/facebookresearch/detr/blob/colab/notebooks/detr_attention.ipynb#scrollTo=hYVZjfGhYTEa
+
+    h, w = conv_features['0'].tensors.shape[-2:]
 
     fig, axs = plt.subplots(ncols=len(bboxes_scaled),
                             nrows=2, figsize=(22, 9.5))

@@ -199,8 +199,14 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         hook.remove()
 
     conv_features = conv_features[0]
-    enc_attn_weights = enc_attn_weights[0]
+    enc_attn_weights = enc_attn_weights[0].cpu
     dec_attn_weights = dec_attn_weights[0].cpu()
+
+    f_map = conv_features['0']
+    print("Encoder attention:      ", enc_attn_weights[0].shape)
+    print("Feature map:            ", f_map.tensors.shape)
+    print(" ")
+    print("Decoder attention:      ", dec_attn_weights[0].shape)
 
     # visualizing attention
 
