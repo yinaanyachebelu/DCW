@@ -13,7 +13,7 @@ from PIL import Image
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, DistributedSampler
 import datasets
 import util.misc as utils
 import datasets.samplers as samplers
@@ -243,23 +243,14 @@ def main(args):
     model.to(device)
 
     model_without_ddp = model
-    n_parameters = sum(p.numel()
-                       for p in model.parameters() if p.requires_grad)
-    print('number of params:', n_parameters)
 
     dataset_train = build_dataset(image_set='train', args=args)
     dataset_val = build_dataset(image_set='val', args=args)
     dataset_test = build_dataset(image_set='test', args=args)
 
     if args.distributed:
-        if args.cache_mode:
-            sampler_train = samplers.NodeDistributedSampler(dataset_train)
-            sampler_val = samplers.NodeDistributedSampler(
-                dataset_val, shuffle=False)
-        else:
-            sampler_train = samplers.DistributedSampler(dataset_train)
-            sampler_val = samplers.DistributedSampler(
-                dataset_val, shuffle=False)
+        sampler_train = DistributedSampler(dataset_train)
+        sampler_val = DistributedSampler(dataset_val, shuffle=False)
     else:
         sampler_train = torch.utils.data.RandomSampler(dataset_train)
         sampler_val = torch.utils.data.SequentialSampler(dataset_val)
@@ -269,12 +260,15 @@ def main(args):
         sampler_train, args.batch_size, drop_last=True)
 
     data_loader_train = DataLoader(dataset_train, batch_sampler=batch_sampler_train,
-                                   collate_fn=utils.collate_fn, num_workers=args.num_workers,
-                                   pin_memory=True)
+                                   collate_fn=utils.collate_fn, num_workers=args.num_workers)
     data_loader_val = DataLoader(dataset_val, args.batch_size, sampler=sampler_val,
-                                 drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers,
-                                 pin_memory=True)
-    data_loader_test = DataLoader(dataset_test, args.batch_size, sampler=sampler_test,
+                                 drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
+
+    # NEW DATALOADER FOR TEST VIZUALIZATION
+    indices = [4, 10, 75, 100, 460, 800]
+    subset = torch.utils.data.Subset(dataset_test, indices)
+
+    data_loader_test = DataLoader(subset, args.batch_size, sampler=torch.utils.data.SequentialSampler(subset),
                                   drop_last=False, collate_fn=utils.collate_fn, num_workers=args.num_workers)
 
     # lr_backbone_names = ["backbone.0", "backbone.neck", "input_proj", "transformer.encoder"]
@@ -330,56 +324,25 @@ def main(args):
         model_without_ddp.detr.load_state_dict(checkpoint['model'])
 
     output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
     if args.resume:
         if args.resume.startswith('https'):
             checkpoint = torch.hub.load_state_dict_from_url(
                 args.resume, map_location='cpu', check_hash=True)
         else:
-            # LOAD WEIGHTS INTO MODEL
             checkpoint = torch.load(args.resume, map_location='cpu')
-            # When number of classes changes, modify the model as well. Otherwise, keep original weights !
-            if args.num_classes != 13 or args.dataset_file != 'coco':
-                print(
-                    f"Deleting last linear layer weights as num_classes is different {args.num_classes} than expected for coco (91)")
-                keys = list(checkpoint['model'].keys())
-                for i in keys:
-                    if 'class_embed' in i:
-                        del checkpoint["model"][i]
-            else:
-                print("Keeping all the original weights.")
-        missing_keys, unexpected_keys = model_without_ddp.load_state_dict(
-            checkpoint['model'], strict=False)
-        unexpected_keys = [k for k in unexpected_keys if not (
-            k.endswith('total_params') or k.endswith('total_ops'))]
-        if len(missing_keys) > 0:
-            print('Missing Keys: {}'.format(missing_keys))
-        if len(unexpected_keys) > 0:
-            print('Unexpected Keys: {}'.format(unexpected_keys))
-        # import pdb; pdb.set_trace()
+
+        #del checkpoint["model"]["class_embed.weight"]
+        #del checkpoint["model"]["class_embed.bias"]
+        #del checkpoint["model"]["query_embed.weight"]
+
+        model_without_ddp.load_state_dict(checkpoint['model'], strict=False)
+
+        #model_without_ddp.load_state_dict(checkpoint['state_dict'], strict=False)
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
-            import copy
-            # p_groups = copy.deepcopy(optimizer.param_groups)
-            # optimizer.load_state_dict(checkpoint['optimizer'])
-            # for pg, pg_old in zip(optimizer.param_groups, p_groups):
-            #     pg['lr'] = pg_old['lr']
-            #     pg['initial_lr'] = pg_old['initial_lr']
-            # print(optimizer.param_groups)
+            optimizer.load_state_dict(checkpoint['optimizer'])
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
-            # todo: this is a hack for doing experiment that resume from checkpoint and also modify lr scheduler (e.g., decrease lr in advance).
-            args.override_resumed_lr_drop = True
-            if args.override_resumed_lr_drop:
-                print('Warning: (hack) args.override_resumed_lr_drop is set to True, so args.lr_drop would override lr_drop in resumed lr_scheduler.')
-                lr_scheduler.step_size = args.lr_drop
-                lr_scheduler.base_lrs = list(
-                    map(lambda group: group['initial_lr'], optimizer.param_groups))
-            lr_scheduler.step(lr_scheduler.last_epoch)
             args.start_epoch = checkpoint['epoch'] + 1
-        # check the resumed model
-        if not args.eval:
-            test_stats, coco_evaluator, val_loss = evaluate(
-                model, criterion, postprocessors, data_loader_test, base_ds, device, args.output_dir
-            )
+
     args.eval = True
     if args.eval:
 
