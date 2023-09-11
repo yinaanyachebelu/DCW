@@ -242,8 +242,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     shape_22a = [251, 71]
     shape_22b = [16, 16]
 
-    shape_22c = [8, 32]
-    shape_22d = [251, 71]
+    shape_22c = [251, 32]
+    shape_22d = [8, 71]
 
     # and reshape the self-attention to a more interpretable shape
     sattn = enc_attn_weights[0].reshape(shape_22c + shape_22d)
@@ -252,7 +252,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     fact = 32
 
     # let's select 4 reference points for visualization
-    idxs = [(200, 200), (280, 400)]
+    idxs = [(300, 210), (600, 400)]
 
     # here we create the canvas
     fig = plt.figure(constrained_layout=True, figsize=(12, 10))
@@ -282,7 +282,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
         fcenter_ax.add_patch(plt.Circle(
             (x * scale, y * scale), fact // 2, color='r'))
         fcenter_ax.axis('off')
-    fig.savefig('charts/blue_att_3.jpg')
+    fig.savefig('charts/blue_att_4.jpg')
 
 #######################################################
 
