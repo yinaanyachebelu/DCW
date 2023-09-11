@@ -238,8 +238,11 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     #shape = f_map.tensors.shape[-2:]
     shape_22y = 4016
     shape_22x = 1136
+
+    shape_22a = [251, 71]
+    shape_22b = [16, 16]
     # and reshape the self-attention to a more interpretable shape
-    sattn = enc_attn_weights[0].reshape(shape_22y + shape_22x)
+    sattn = enc_attn_weights[0].reshape(shape_22a + shape_22b)
     print("Reshaped self-attention:", sattn.shape)
 
     fact = 32
