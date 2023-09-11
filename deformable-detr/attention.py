@@ -206,7 +206,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
 
         ),
         model.transformer.decoder.layers[-1].cross_attn.register_forward_hook(
-            lambda self, input, output: dec_attn_weights.append(output[1])
+            lambda self, input, output: dec_attn_weights.append(output)
 
         ),
 
