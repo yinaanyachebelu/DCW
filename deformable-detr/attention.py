@@ -237,7 +237,8 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     print("Decoder attention:      ", dec_attn_weights[0].shape)
 
     # get the HxW shape of the feature maps of the CNN
-    #shape = f_map.tensors.shape[-2:]
+    shape = f_map.tensors.shape[-2:]
+
     shape_22y = 4016
     shape_22x = 1136
 
