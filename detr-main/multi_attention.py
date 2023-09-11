@@ -153,7 +153,7 @@ def evaluate_test(model, criterion, postprocessors, data_loader, device, thres=0
     thresh = 0.75
 
     img_61 = "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000061.jpg"
-    img_61 = "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000022.jpg"
+    img_22 = "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/test2017/000000000022.jpg"
 
     orig_image = Image.open(img_22)
     w, h = orig_image.size
