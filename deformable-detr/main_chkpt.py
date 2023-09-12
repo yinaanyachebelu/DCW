@@ -38,7 +38,7 @@ def get_args_parser():
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
     parser.add_argument('--lr_linear_proj_mult', default=0.1, type=float)
     parser.add_argument('--batch_size', default=4, type=int)
-    parser.add_argument('--weight_decay', default=1e-5, type=float)
+    parser.add_argument('--weight_decay', default=2e-6, type=float)
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--lr_drop', default=40, type=int)
     parser.add_argument('--lr_drop_epochs', default=None, type=int, nargs='+')
@@ -252,13 +252,13 @@ def main(args):
             checkpoint = torch.load(args.resume, map_location='cpu')
             # When number of classes changes, modify the model as well. Otherwise, keep original weights !
             if args.num_classes != 91 or args.dataset_file != 'coco':
-                print(
-                    f"Deleting last linear layer weights as num_classes is different {args.num_classes} than expected for coco (91)")
-                keys = list(checkpoint['model'].keys())
-                for i in keys:
-                    if 'class_embed' in i:
-                        del checkpoint["model"][i]
-            else:
+                #     print(
+                #         f"Deleting last linear layer weights as num_classes is different {args.num_classes} than expected for coco (91)")
+                #     keys = list(checkpoint['model'].keys())
+                #     for i in keys:
+                #         if 'class_embed' in i:
+                #             del checkpoint["model"][i]
+                # else:
                 print("Keeping all the original weights.")
         missing_keys, unexpected_keys = model_without_ddp.load_state_dict(
             checkpoint['model'], strict=False)
@@ -276,14 +276,20 @@ def main(args):
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             import copy
             # p_groups = copy.deepcopy(optimizer.param_groups)
-            #optimizer.load_state_dict(checkpoint['optimizer'])
+            # optimizer.load_state_dict(checkpoint['optimizer'])
             # for pg, pg_old in zip(optimizer.param_groups, p_groups):
             #     pg['lr'] = pg_old['lr']
             #     pg['initial_lr'] = pg_old['initial_lr']
             # print("new optimizer:")
             # print(optimizer.param_groups)
 
+            # optimizer.load_state_dict(checkpoint['optimizer'])
             lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
+
+            # lr you want for the transformer
+            optimizer.param_groups[0]["lr"] = 5e-5
+            # lr you want for the backbone
+            optimizer.param_groups[1]["lr"] = 5e-6
             # todo: this is a hack for doing experiment that resume from checkpoint and also modify lr scheduler (e.g., decrease lr in advance).
             args.override_resumed_lr_drop = True
             if args.override_resumed_lr_drop:
@@ -295,7 +301,7 @@ def main(args):
                 print(lr_scheduler.base_lrs)
             lr_scheduler.step(lr_scheduler.last_epoch)
             args.start_epoch = checkpoint['epoch'] + 1
-        # check the resumed model
+        # check the resumed
         if not args.eval:
             test_stats, coco_evaluator, val_loss = evaluate(
                 model, criterion, postprocessors, data_loader_val, base_ds, device, args.output_dir
