@@ -332,8 +332,8 @@ class SetCriterion(nn.Module):
             logits_width, logits_height = logits_x2 - logits_x1, logits_y2 - logits_y1
             labels_width, labels_height = labels_x2 - labels_x1, labels_y2 - labels_y1
 
-            v = (4 / math.pi ** 2) * torch.pow(
-                torch.atan(labels_width / (labels_height + smooth)) - torch.atan(logits_width / (logits_height + smooth)), 2)
+            v = torch.diag((4 / math.pi ** 2) * torch.pow(
+                torch.atan(labels_width / (labels_height + smooth)) - torch.atan(logits_width / (logits_height + smooth)), 2))
 
             with torch.no_grad():
                 alpha = v / (1 - iou + v + smooth)
