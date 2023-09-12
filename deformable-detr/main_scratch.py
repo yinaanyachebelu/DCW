@@ -33,12 +33,12 @@ def get_args_parser():
     parser.add_argument('--lr', default=5e-5, type=float)
     parser.add_argument('--lr_backbone_names',
                         default=["backbone.0"], type=str, nargs='+')
-    parser.add_argument('--lr_backbone', default=5e-4, type=float)
+    parser.add_argument('--lr_backbone', default=5e-6, type=float)
     parser.add_argument('--lr_linear_proj_names',
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
     parser.add_argument('--lr_linear_proj_mult', default=1, type=float)
     parser.add_argument('--batch_size', default=4, type=int)
-    parser.add_argument('--weight_decay', default=5e-4, type=float)
+    parser.add_argument('--weight_decay', default=5e-5, type=float)
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--lr_drop', default=50, type=int)
     parser.add_argument('--lr_drop_epochs', default=None, type=int, nargs='+')
@@ -262,15 +262,15 @@ def main(args):
             # LOAD WEIGHTS INTO MODEL
             checkpoint = torch.load(args.resume, map_location='cpu')
             # When number of classes changes, modify the model as well. Otherwise, keep original weights !
-            if args.num_classes != 91 or args.dataset_file != 'coco':
-                print(
-                    f"Deleting last linear layer weights as num_classes is different {args.num_classes} than expected for coco (91)")
-                keys = list(checkpoint['model'].keys())
-                for i in keys:
-                    if 'class_embed' in i:
-                        del checkpoint["model"][i]
-            else:
-                print("Keeping all the original weights.")
+            # if args.num_classes != 91 or args.dataset_file != 'coco':
+            #     print(
+            #         f"Deleting last linear layer weights as num_classes is different {args.num_classes} than expected for coco (91)")
+            #     keys = list(checkpoint['model'].keys())
+            #     for i in keys:
+            #         if 'class_embed' in i:
+            #             del checkpoint["model"][i]
+            # else:
+            #print("Keeping all the original weights.")
         missing_keys, unexpected_keys = model_without_ddp.load_state_dict(
             checkpoint['model'], strict=False)
         unexpected_keys = [k for k in unexpected_keys if not (
@@ -294,17 +294,17 @@ def main(args):
             # print("new optimizer:")
             # print(optimizer.param_groups)
 
-            lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
-            # todo: this is a hack for doing experiment that resume from checkpoint and also modify lr scheduler (e.g., decrease lr in advance).
-            args.override_resumed_lr_drop = True
-            if args.override_resumed_lr_drop:
-                print('Warning: (hack) args.override_resumed_lr_drop is set to True, so args.lr_drop would override lr_drop in resumed lr_scheduler.')
-                lr_scheduler.step_size = args.lr_drop
-                lr_scheduler.base_lrs = list(
-                    map(lambda group: group['initial_lr'], optimizer.param_groups))
-                print("base lr:")
-                print(lr_scheduler.base_lrs)
-            lr_scheduler.step(lr_scheduler.last_epoch)
+            # lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
+            # # todo: this is a hack for doing experiment that resume from checkpoint and also modify lr scheduler (e.g., decrease lr in advance).
+            # args.override_resumed_lr_drop = True
+            # if args.override_resumed_lr_drop:
+            #     print('Warning: (hack) args.override_resumed_lr_drop is set to True, so args.lr_drop would override lr_drop in resumed lr_scheduler.')
+            #     lr_scheduler.step_size = args.lr_drop
+            #     lr_scheduler.base_lrs = list(
+            #         map(lambda group: group['initial_lr'], optimizer.param_groups))
+            #     print("base lr:")
+            #     print(lr_scheduler.base_lrs)
+            # lr_scheduler.step(lr_scheduler.last_epoch)
             args.start_epoch = checkpoint['epoch'] + 1
         # check the resumed model
         if not args.eval:
