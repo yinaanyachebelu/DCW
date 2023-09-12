@@ -313,7 +313,7 @@ class SetCriterion(nn.Module):
         def box_ciou_loss(logits, labels):
 
             iou, union = box_ops.box_iou(logits, labels)
-            diou = torch.diag(box_ops.box_diou(logits, labels))
+            diou = box_ops.box_diou(logits, labels)
             smooth = 1e-9
 
             logits_center_x, logits_center_y = logits[:, 0], logits[:, 1]
@@ -332,13 +332,14 @@ class SetCriterion(nn.Module):
             logits_width, logits_height = logits_x2 - logits_x1, logits_y2 - logits_y1
             labels_width, labels_height = labels_x2 - labels_x1, labels_y2 - labels_y1
 
-            v = torch.diag((4 / math.pi ** 2) * torch.pow(
-                torch.atan(labels_width / (labels_height + smooth)) - torch.atan(logits_width / (logits_height + smooth)), 2))
+            v = (4 / math.pi ** 2) * torch.pow(
+                torch.atan(labels_width / (labels_height + smooth)) - torch.atan(logits_width / (logits_height + smooth)), 2)
 
             with torch.no_grad():
                 alpha = v / (1 - iou + v + smooth)
 
             ciou_loss = 1 - diou + alpha * v
+            ciou_loss = torch.diag(ciou_loss)
             return ciou_loss
 
         loss_ciou = box_ciou_loss(logits, labels)
