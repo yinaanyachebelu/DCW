@@ -312,7 +312,7 @@ class SetCriterion(nn.Module):
 
         def box_ciou_loss(logits, labels):
 
-            iou = box_ops.box_iou(logits, labels)
+            iou, union = box_ops.box_iou(logits, labels)
             diou = torch.diag(box_ops.box_diou(logits, labels))
             smooth = 1e-9
 
