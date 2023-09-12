@@ -305,8 +305,8 @@ class SetCriterion(nn.Module):
         #     box_ops.box_cxcywh_to_xyxy(target_boxes)))
         # losses['loss_diou'] = loss_diou.sum() / num_boxes
 
-        loss_ciou = torch.diag(box_ops.box_ciou_loss(box_ops.box_cxcywh_to_xyxy(src_boxes),
-                                                     box_ops.box_cxcywh_to_xyxy(target_boxes)))
+        loss_ciou = box_ops.box_ciou_loss(box_ops.box_cxcywh_to_xyxy(src_boxes),
+                                          box_ops.box_cxcywh_to_xyxy(target_boxes))
         losses['loss_ciou'] = loss_ciou.sum() / num_boxes
 
         return losses
