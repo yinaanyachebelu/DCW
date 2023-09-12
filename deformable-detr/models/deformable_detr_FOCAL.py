@@ -288,12 +288,12 @@ class SetCriterion(nn.Module):
         target_boxes = torch.cat([t['boxes'][i]
                                  for t, (_, i) in zip(targets, indices)], dim=0)
 
-        #loss_bbox = F.l1_loss(src_boxes, target_boxes, reduction='none')
+        loss_bbox = F.l1_loss(src_boxes, target_boxes, reduction='none')
 
         losses = {}
-        losses['loss_bbox'] = sigmoid_focal_loss(
-            src_boxes, target_boxes, num_boxes, alpha=self.focal_alpha, gamma=2)
-        #losses['loss_bbox'] = loss_bbox.sum() / num_boxes
+        # losses['loss_bbox'] = sigmoid_focal_loss(
+        # src_boxes, target_boxes, num_boxes, alpha=self.focal_alpha, gamma=2)
+        losses['loss_bbox'] = loss_bbox.sum() / num_boxes
 
         loss_giou = 1 - torch.diag(box_ops.generalized_box_iou(
             box_ops.box_cxcywh_to_xyxy(src_boxes),
