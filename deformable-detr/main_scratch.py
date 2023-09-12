@@ -22,7 +22,7 @@ import datasets
 import util.misc as utils
 import datasets.samplers as samplers
 from datasets import build_dataset, get_coco_api_from_dataset
-from engine import evaluate, train_one_epoch
+from engine_scratch import evaluate, train_one_epoch
 from models import build_model
 from models import laprop
 
@@ -30,17 +30,17 @@ from models import laprop
 def get_args_parser():
     parser = argparse.ArgumentParser(
         'Deformable DETR Detector', add_help=False)
-    parser.add_argument('--lr', default=4e-4, type=float)
+    parser.add_argument('--lr', default=1e-4, type=float)
     parser.add_argument('--lr_backbone_names',
                         default=["backbone.0"], type=str, nargs='+')
-    parser.add_argument('--lr_backbone', default=4e-5, type=float)
+    parser.add_argument('--lr_backbone', default=1e-5, type=float)
     parser.add_argument('--lr_linear_proj_names',
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
-    parser.add_argument('--lr_linear_proj_mult', default=0.1, type=float)
+    parser.add_argument('--lr_linear_proj_mult', default=1, type=float)
     parser.add_argument('--batch_size', default=4, type=int)
-    parser.add_argument('--weight_decay', default=1e-5, type=float)
+    parser.add_argument('--weight_decay', default=5e-5, type=float)
     parser.add_argument('--epochs', default=50, type=int)
-    parser.add_argument('--lr_drop', default=40, type=int)
+    parser.add_argument('--lr_drop', default=50, type=int)
     parser.add_argument('--lr_drop_epochs', default=None, type=int, nargs='+')
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
                         help='gradient clipping max norm')
@@ -82,7 +82,7 @@ def get_args_parser():
                         help="Dropout applied in the transformer")
     parser.add_argument('--nheads', default=8, type=int,
                         help="Number of attention heads inside the transformer's attentions")
-    parser.add_argument('--num_queries', default=300, type=int,
+    parser.add_argument('--num_queries', default=20, type=int,
                         help="Number of query slots")
     parser.add_argument('--dec_n_points', default=4, type=int)
     parser.add_argument('--enc_n_points', default=4, type=int)
@@ -216,12 +216,22 @@ def main(args):
         optimizer = torch.optim.SGD(param_dicts, lr=args.lr, momentum=0.9,
                                     weight_decay=args.weight_decay)
     elif args.laprop:
-        optimizer = laprop.LaProp(param_dicts, lr=args.lr,
+        optimizer = laprop.LaProp(param_dicts,   lr=args.lr,
                                   weight_decay=args.weight_decay)
     else:
-        optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
+        optimizer = torch.optim.AdamW(param_dicts,  lr=args.lr,
                                       weight_decay=args.weight_decay)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
+
+    #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
+    lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,
+                                                       max_lr=1e-3,
+                                                       pct_start=0.2,
+                                                       div_factor=10,
+                                                       final_div_factor=10,
+                                                       steps_per_epoch=917,
+                                                       epochs=args.epochs,
+                                                       anneal_strategy='cos')  # Specifies the annealing strategy
+
     # lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     # optimizer, T_max=50, eta_min=2e-5)
 
@@ -243,6 +253,7 @@ def main(args):
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+
     if args.resume:
         if args.resume.startswith('https'):
             checkpoint = torch.hub.load_state_dict_from_url(
@@ -276,7 +287,7 @@ def main(args):
         if not args.eval and 'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
             import copy
             # p_groups = copy.deepcopy(optimizer.param_groups)
-            #optimizer.load_state_dict(checkpoint['optimizer'])
+            # optimizer.load_state_dict(checkpoint['optimizer'])
             # for pg, pg_old in zip(optimizer.param_groups, p_groups):
             #     pg['lr'] = pg_old['lr']
             #     pg['initial_lr'] = pg_old['initial_lr']
@@ -315,8 +326,8 @@ def main(args):
         if args.distributed:
             sampler_train.set_epoch(epoch)
         train_stats = train_one_epoch(
-            model, criterion, data_loader_train, optimizer, device, epoch, args.clip_max_norm)
-        lr_scheduler.step()
+            model, criterion, data_loader_train, optimizer, device, epoch, args.clip_max_norm, lr_scheduler)
+        # lr_scheduler.step()
         if args.output_dir:
             checkpoint_paths = [output_dir / 'checkpoint.pth']
             # extra checkpoint before LR drop and every 5 epochs
