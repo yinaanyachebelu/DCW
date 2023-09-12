@@ -23,7 +23,7 @@ from datasets.data_prefetcher import data_prefetcher
 
 
 def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
-                    data_loader: Iterable, optimizer: torch.optim.Optimizer, lr_scheduler: torch.optim.lr_scheduler, device: torch.device, epoch: int, max_norm: float = 0, ):
+                    data_loader: Iterable, optimizer: torch.optim.Optimizer, lr_scheduler: torch.optim.lr_scheduler, device: torch.device, epoch: int, max_norm: float = 0):
     model.train()
     criterion.train()
     metric_logger = utils.MetricLogger(delimiter="  ")
