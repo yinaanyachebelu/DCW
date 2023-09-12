@@ -30,15 +30,15 @@ from models import laprop
 def get_args_parser():
     parser = argparse.ArgumentParser(
         'Deformable DETR Detector', add_help=False)
-    parser.add_argument('--lr', default=5e-6, type=float)
+    parser.add_argument('--lr', default=5e-5, type=float)
     parser.add_argument('--lr_backbone_names',
                         default=["backbone.0"], type=str, nargs='+')
-    parser.add_argument('--lr_backbone', default=5e-7, type=float)
+    parser.add_argument('--lr_backbone', default=5e-4, type=float)
     parser.add_argument('--lr_linear_proj_names',
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
     parser.add_argument('--lr_linear_proj_mult', default=1, type=float)
     parser.add_argument('--batch_size', default=4, type=int)
-    parser.add_argument('--weight_decay', default=5e-7, type=float)
+    parser.add_argument('--weight_decay', default=5e-4, type=float)
     parser.add_argument('--epochs', default=50, type=int)
     parser.add_argument('--lr_drop', default=50, type=int)
     parser.add_argument('--lr_drop_epochs', default=None, type=int, nargs='+')
@@ -224,10 +224,10 @@ def main(args):
 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
     lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,
-                                                       max_lr=5e-5,
+                                                       max_lr=1e-4,
                                                        pct_start=0.2,
-                                                       div_factor=10,
-                                                       final_div_factor=15,
+                                                       div_factor=2,
+                                                       final_div_factor=10,
                                                        steps_per_epoch=917,
                                                        epochs=args.epochs,
                                                        anneal_strategy='cos')  # Specifies the annealing strategy
