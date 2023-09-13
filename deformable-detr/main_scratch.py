@@ -305,6 +305,7 @@ def main(args):
             #     print("base lr:")
             #     print(lr_scheduler.base_lrs)
             # lr_scheduler.step(lr_scheduler.last_epoch)
+            optimizer.load_state_dict(checkpoint['optimizer'])
             args.start_epoch = checkpoint['epoch'] + 1
         # check the resumed model
         if not args.eval:
