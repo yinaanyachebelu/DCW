@@ -19,7 +19,7 @@ import numpy as np
 from pathlib import Path, PurePath
 
 
-def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col=0, log_name='log.txt'):
+def plot_logs(logs, save_dir, fields=('mAP', 'class_error', 'loss_bbox_unscaled'), ewm_col=0, log_name='log.txt'):
     '''
     Function to plot specific fields from training log(s). Plots both training and test results.
 
@@ -80,7 +80,7 @@ def plot_logs(logs, fields=('class_error', 'loss_bbox_unscaled', 'mAP'), ewm_col
     for ax, field in zip(axs, fields):
         #ax.legend([Path(p).name for p in logs])
         ax.set_title(field)
-    plt.savefig('charts/map_loss_run_focal_laprop_3.jpg')
+    plt.savefig(save_dir)
     print("image saved")
 
 
