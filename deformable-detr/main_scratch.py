@@ -82,7 +82,7 @@ def get_args_parser():
                         help="Dropout applied in the transformer")
     parser.add_argument('--nheads', default=8, type=int,
                         help="Number of attention heads inside the transformer's attentions")
-    parser.add_argument('--num_queries', default=20, type=int,
+    parser.add_argument('--num_queries', default=300, type=int,
                         help="Number of query slots")
     parser.add_argument('--dec_n_points', default=4, type=int)
     parser.add_argument('--enc_n_points', default=4, type=int)
@@ -304,8 +304,10 @@ def main(args):
             #         map(lambda group: group['initial_lr'], optimizer.param_groups))
             #     print("base lr:")
             #     print(lr_scheduler.base_lrs)
+
+            # optimizer.load_state_dict(checkpoint['optimizer'])
             # lr_scheduler.step(lr_scheduler.last_epoch)
-            optimizer.load_state_dict(checkpoint['optimizer'])
+
             args.start_epoch = checkpoint['epoch'] + 1
         # check the resumed model
         if not args.eval:
