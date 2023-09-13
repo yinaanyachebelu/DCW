@@ -1,6 +1,7 @@
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 import pandas as pd
+import argparse
 
 ann_path = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_test2017.json'
 pred_path_yolo = '/home/ayina/MscThesis/DCW/YOLOv4/runs/test/exp9/best_predictions.json'
@@ -10,6 +11,16 @@ pred_path_deform = '/home/ayina/MscThesis/DCW/deformable-detr/preds/test_predict
 # testing using val set with detr
 ann_path_val = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_val2017.json'
 pred_path_detr_val = '/home/ayina/MscThesis/DCW/detr-main/preds/model_predictions.json'
+
+
+def get_args_parser():
+    parser = argparse.ArgumentParser(
+        'Get Coco json results', add_help=False)
+    parser.add_argument(
+        '--pred_path', default='/home/ayina/MscThesis/DCW/deformable-detr/preds/test_predictions.json', type=str)
+
+    return parser
+
 
 columns = ['Category', 'AP50', 'AP@[0.50:0.95]', 'AR@[0.50:0.95]']
 results = []
@@ -31,9 +42,12 @@ cats = [
 ]
 
 
-def main():
+def main(args):
+
+    pred_path = args.pred_path
+
     Gt = COCO(ann_path)
-    dets = Gt.loadRes(pred_path_detr)
+    dets = Gt.loadRes(pred_path)
 
     coco_eval = COCOeval(Gt, dets, "bbox")
     coco_eval.evaluate()
@@ -52,4 +66,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+
+    parser = argparse.ArgumentParser(
+        'Get Coco json results', parents=[get_args_parser()])
+    args = parser.parse_args()
+    main(args)
