@@ -24,6 +24,7 @@ import datasets.samplers as samplers
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine_test import evaluate, train_one_epoch
 from models import build_model
+from models import laprop
 
 
 def get_args_parser():
@@ -129,7 +130,9 @@ def get_args_parser():
                         action='store_true', help='whether to cache images on memory')
     # By default, Model was trained on 91 classes
     parser.add_argument('--num_classes', default=13, type=int)
-
+    # save inference directory
+    parser.add_argument(
+        '--save_dir', default='preds/new_predictions.json', type=str)
     return parser
 
 
@@ -217,6 +220,9 @@ def main(args):
     if args.sgd:
         optimizer = torch.optim.SGD(param_dicts, lr=args.lr, momentum=0.9,
                                     weight_decay=args.weight_decay)
+    elif args.laprop:
+        optimizer = laprop.LaProp(param_dicts, lr=args.lr,
+                                  weight_decay=args.weight_decay)
     else:
         optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
                                       weight_decay=args.weight_decay)
@@ -297,7 +303,7 @@ def main(args):
 
         res = [item for sublist in jdict for item in sublist]
 
-        pred_json = "preds/test_predictions.json"  # predictions json
+        pred_json = args.save_dir  # predictions json
         with open(pred_json, 'w') as f:
             json.dump(res, f)
 
