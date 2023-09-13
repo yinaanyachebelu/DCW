@@ -226,7 +226,7 @@ def main(args):
     lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,
                                                        max_lr=2e-4,
                                                        pct_start=0.3,
-                                                       div_factor=2,
+                                                       div_factor=4,
                                                        final_div_factor=25,  # end with 2e-6
                                                        steps_per_epoch=917,
                                                        epochs=args.epochs,
