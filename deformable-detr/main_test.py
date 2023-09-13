@@ -46,6 +46,7 @@ def get_args_parser():
                         help='gradient clipping max norm')
 
     parser.add_argument('--sgd', action='store_true')
+    parser.add_argument('--laprop', action='store_true')
 
     # Variants of Deformable DETR
     parser.add_argument('--with_box_refine',
