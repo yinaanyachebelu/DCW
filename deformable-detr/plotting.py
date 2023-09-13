@@ -6,7 +6,7 @@ import argparse
 def get_args_parser():
     parser = argparse.ArgumentParser(
         'Plotting logs', add_help=False)
-    parser.add_argument('--output_dir', default='runs_scratch/', type=float)
+    parser.add_argument('--output_dir', default='runs_scratch/', type=str)
     parser.add_argument('--save_dir',
                         default='charts/file.jpg', type=str)
 
