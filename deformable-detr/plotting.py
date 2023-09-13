@@ -10,6 +10,8 @@ def get_args_parser():
     parser.add_argument('--save_dir',
                         default='charts/file.jpg', type=str)
 
+    return parser
+
 
 fields_of_interest = ('mAP', 'loss')
 
