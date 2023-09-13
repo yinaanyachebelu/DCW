@@ -8,7 +8,8 @@ def get_args_parser():
         'Plotting logs', add_help=False)
     parser.add_argument('--output_dir', default='runs_scratch/', type=float)
     parser.add_argument('--save_dir',
-                        default='charts/', type=str, nargs='+')
+                        default='charts/file.jpg', type=str)
+
 
 fields_of_interest = ('mAP', 'loss')
 
