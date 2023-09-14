@@ -38,8 +38,8 @@ def get_args_parser():
                         default=['reference_points', 'sampling_offsets'], type=str, nargs='+')
     parser.add_argument('--lr_linear_proj_mult', default=1, type=float)
     parser.add_argument('--batch_size', default=4, type=int)
-    parser.add_argument('--weight_decay', default=8e-5, type=float)
-    parser.add_argument('--epochs', default=50, type=int)
+    parser.add_argument('--weight_decay', default=9e-5, type=float)
+    parser.add_argument('--epochs', default=75, type=int)
     parser.add_argument('--lr_drop', default=50, type=int)
     parser.add_argument('--lr_drop_epochs', default=None, type=int, nargs='+')
     parser.add_argument('--clip_max_norm', default=0.1, type=float,
@@ -224,9 +224,9 @@ def main(args):
 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
     lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,
-                                                       max_lr=6e-5,
-                                                       pct_start=0.3,
-                                                       div_factor=4,
+                                                       max_lr=1.1e-4,
+                                                       pct_start=0.2,
+                                                       div_factor=2.5,
                                                        final_div_factor=25,  # end with 2e-6
                                                        steps_per_epoch=917,
                                                        epochs=args.epochs,
