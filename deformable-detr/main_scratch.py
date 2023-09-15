@@ -312,10 +312,10 @@ def main(args):
             # optimizer.param_groups[1]["lr"] = 0.01 # lr you want for the backbone
 
             lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,
-                                                               max_lr=2.5e-6,
+                                                               max_lr=1e-6,
                                                                pct_start=0.2,
                                                                div_factor=1.5,
-                                                               final_div_factor=2.5,
+                                                               final_div_factor=2,
                                                                steps_per_epoch=917,
                                                                epochs=args.epochs,
                                                                anneal_strategy='cos')
