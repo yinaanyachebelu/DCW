@@ -5,8 +5,10 @@ import random
 from copy import copy
 from pathlib import Path
 
-import cv2
-from utils.general import *; plot_results_overlay()
+from utils.general import *
+from utils.plots import *
+
+
 
 if __name__ == '__main__':
     #parser = argparse.ArgumentParser(
