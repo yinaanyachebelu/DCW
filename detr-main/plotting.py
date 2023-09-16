@@ -1,11 +1,26 @@
 from util.plot_utils import plot_logs
 from pathlib import Path
+import argparse
 
-log_directory = [Path('runs/')]
 
-fields_of_interest = ('loss','mAP',)
+def get_args_parser():
+    parser = argparse.ArgumentParser(
+        'Plotting logs', add_help=False)
+    parser.add_argument('--output_dir', default='runs2/', type=str)
+    parser.add_argument('--save_dir',
+                        default='graphics/runs2.jpg', type=str)
+
+    return parser
+
+
+fields_of_interest = ('mAP', 'loss')
 
 
 if __name__ == "__main__":
-    
-    plot_logs(log_directory, fields_of_interest)
+
+    parser = argparse.ArgumentParser(
+        'Plotting logs', parents=[get_args_parser()])
+    args = parser.parse_args()
+
+    log_directory = [Path(args.output_dir)]
+    plot_logs(log_directory, args.save_dir, fields=fields_of_interest)
