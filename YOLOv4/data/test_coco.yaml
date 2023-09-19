@@ -12,7 +12,8 @@
 #train:   # train images (relative to 'path') 128 images
 #val:   # val images (relative to 'path') 128 images
 test: /home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_YOLO/test.txt # test images (optional)
-temp_test: /home/ayina/MscThesis/DCW/temp.txt #for testing with 1 image
+temp_test: /home/ayina/MscThesis/DCW/temp.txt #for testing with 1 image -- img 22
+temp_23: /home/ayina/MscThesis/DCW/temp23.txt #for testing with 1 image
 
 
 # Classes
