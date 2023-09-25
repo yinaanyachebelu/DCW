@@ -33,7 +33,8 @@ def color_list():
 
 def hist2d(x, y, n=100):
     # 2d histogram used in labels.png and evolve.png
-    xedges, yedges = np.linspace(x.min(), x.max(), n), np.linspace(y.min(), y.max(), n)
+    xedges, yedges = np.linspace(
+        x.min(), x.max(), n), np.linspace(y.min(), y.max(), n)
     hist, xedges, yedges = np.histogram2d(x, y, (xedges, yedges))
     xidx = np.clip(np.digitize(x, xedges) - 1, 0, hist.shape[0] - 1)
     yidx = np.clip(np.digitize(y, yedges) - 1, 0, hist.shape[1] - 1)
@@ -63,7 +64,8 @@ def plot_one_box(x, img, color=None, label=None, line_thickness=None):
         t_size = cv2.getTextSize(label, 0, fontScale=tl / 3, thickness=tf)[0]
         c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
         cv2.rectangle(img, c1, c2, color, -1, cv2.LINE_AA)  # filled
-        cv2.putText(img, label, (c1[0], c1[1] - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+        cv2.putText(img, label, (c1[0], c1[1] - 2), 0, tl / 3,
+                    [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
 
 
 def plot_wh_methods():  # from utils.general import *; plot_wh_methods()
@@ -134,7 +136,8 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
         w = math.ceil(scale_factor * w)
 
     colors = color_list()  # list of colors
-    mosaic = np.full((int(ns * h), int(ns * w), 3), 255, dtype=np.uint8)  # init
+    mosaic = np.full((int(ns * h), int(ns * w), 3),
+                     255, dtype=np.uint8)  # init
     for i, img in enumerate(images):
         if i == max_subplots:  # if last batch has fewer images than we expect
             break
@@ -152,7 +155,8 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
             boxes = xywh2xyxy(image_targets[:, 2:6]).T
             classes = image_targets[:, 1].astype('int')
             labels = image_targets.shape[1] == 6  # labels if no conf column
-            conf = None if labels else image_targets[:, 6]  # check for confidence presence (label vs pred)
+            # check for confidence presence (label vs pred)
+            conf = None if labels else image_targets[:, 6]
 
             boxes[[0, 2]] *= w
             boxes[[0, 2]] += block_x
@@ -163,22 +167,27 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
                 color = colors[cls % len(colors)]
                 cls = names[cls] if names else cls
                 if labels or conf[j] > 0.25:  # 0.25 conf thresh
-                    label = '%s' % cls if labels else '%s %.1f' % (cls, conf[j])
-                    plot_one_box(box, mosaic, label=label, color=color, line_thickness=tl)
+                    label = '%s' % cls if labels else '%s %.1f' % (
+                        cls, conf[j])
+                    plot_one_box(box, mosaic, label=label,
+                                 color=color, line_thickness=tl)
 
         # Draw image filename labels
         if paths:
             label = Path(paths[i]).name[:40]  # trim to 40 char
-            t_size = cv2.getTextSize(label, 0, fontScale=tl / 3, thickness=tf)[0]
+            t_size = cv2.getTextSize(
+                label, 0, fontScale=tl / 3, thickness=tf)[0]
             cv2.putText(mosaic, label, (block_x + 5, block_y + t_size[1] + 5), 0, tl / 3, [220, 220, 220], thickness=tf,
                         lineType=cv2.LINE_AA)
 
         # Image border
-        cv2.rectangle(mosaic, (block_x, block_y), (block_x + w, block_y + h), (255, 255, 255), thickness=3)
+        cv2.rectangle(mosaic, (block_x, block_y), (block_x + w,
+                      block_y + h), (255, 255, 255), thickness=3)
 
     if fname:
         r = min(1280. / max(h, w) / ns, 1.0)  # ratio to limit image size
-        mosaic = cv2.resize(mosaic, (int(ns * w * r), int(ns * h * r)), interpolation=cv2.INTER_AREA)
+        mosaic = cv2.resize(
+            mosaic, (int(ns * w * r), int(ns * h * r)), interpolation=cv2.INTER_AREA)
         # cv2.imwrite(fname, cv2.cvtColor(mosaic, cv2.COLOR_BGR2RGB))  # cv2 save
         Image.fromarray(mosaic).save(fname)  # PIL save
     return mosaic
@@ -186,7 +195,8 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
 
 def plot_lr_scheduler(optimizer, scheduler, epochs=300, save_dir=''):
     # Plot LR simulating training for full epochs
-    optimizer, scheduler = copy(optimizer), copy(scheduler)  # do not modify originals
+    optimizer, scheduler = copy(optimizer), copy(
+        scheduler)  # do not modify originals
     y = []
     for _ in range(epochs):
         scheduler.step()
@@ -225,22 +235,26 @@ def plot_targets_txt():  # from utils.general import *; plot_targets_txt()
     fig, ax = plt.subplots(2, 2, figsize=(8, 8), tight_layout=True)
     ax = ax.ravel()
     for i in range(4):
-        ax[i].hist(x[i], bins=100, label='%.3g +/- %.3g' % (x[i].mean(), x[i].std()))
+        ax[i].hist(x[i], bins=100, label='%.3g +/- %.3g' %
+                   (x[i].mean(), x[i].std()))
         ax[i].legend()
         ax[i].set_title(s[i])
     plt.savefig('targets.jpg', dpi=200)
 
 
-def plot_study_txt(f='study.txt', x=None):  # from utils.general import *; plot_study_txt()
+# from utils.general import *; plot_study_txt()
+def plot_study_txt(f='study.txt', x=None):
     # Plot study.txt generated by test.py
     fig, ax = plt.subplots(2, 4, figsize=(10, 6), tight_layout=True)
     ax = ax.ravel()
 
     fig2, ax2 = plt.subplots(1, 1, figsize=(8, 4), tight_layout=True)
     for f in ['study/study_coco_yolo%s.txt' % x for x in ['s', 'm', 'l', 'x']]:
-        y = np.loadtxt(f, dtype=np.float32, usecols=[0, 1, 2, 3, 7, 8, 9], ndmin=2).T
+        y = np.loadtxt(f, dtype=np.float32, usecols=[
+                       0, 1, 2, 3, 7, 8, 9], ndmin=2).T
         x = np.arange(y.shape[1]) if x is None else np.array(x)
-        s = ['P', 'R', 'mAP@.5', 'mAP@.5:.95', 't_inference (ms/img)', 't_NMS (ms/img)', 't_total (ms/img)']
+        s = ['P', 'R', 'mAP@.5', 'mAP@.5:.95',
+             't_inference (ms/img)', 't_NMS (ms/img)', 't_total (ms/img)']
         for i in range(7):
             ax[i].plot(x, y[i], '.-', linewidth=2, markersize=8)
             ax[i].set_title(s[i])
@@ -287,7 +301,8 @@ def plot_labels(labels, save_dir=''):
         import pandas as pd
         x = pd.DataFrame(b.transpose(), columns=['x', 'y', 'width', 'height'])
         sns.pairplot(x, corner=True, diag_kind='hist', kind='scatter', markers='o',
-                     plot_kws=dict(s=3, edgecolor=None, linewidth=1, alpha=0.02),
+                     plot_kws=dict(s=3, edgecolor=None,
+                                   linewidth=1, alpha=0.02),
                      diag_kws=dict(bins=50))
         plt.savefig(Path(save_dir) / 'labels_correlogram.png', dpi=200)
         plt.close()
@@ -295,7 +310,8 @@ def plot_labels(labels, save_dir=''):
         pass
 
 
-def plot_evolution(yaml_file='data/hyp.finetune.yaml'):  # from utils.general import *; plot_evolution()
+# from utils.general import *; plot_evolution()
+def plot_evolution(yaml_file='data/hyp.finetune.yaml'):
     # Plot hyperparameter evolution results in evolve.txt
     with open(yaml_file) as f:
         hyp = yaml.load(f, Loader=yaml.FullLoader)
@@ -309,9 +325,11 @@ def plot_evolution(yaml_file='data/hyp.finetune.yaml'):  # from utils.general im
         # mu = (y * weights).sum() / weights.sum()  # best weighted result
         mu = y[f.argmax()]  # best single result
         plt.subplot(6, 5, i + 1)
-        plt.scatter(y, f, c=hist2d(y, f, 20), cmap='viridis', alpha=.8, edgecolors='none')
+        plt.scatter(y, f, c=hist2d(y, f, 20), cmap='viridis',
+                    alpha=.8, edgecolors='none')
         plt.plot(mu, f.max(), 'k+', markersize=15)
-        plt.title('%s = %.3g' % (k, mu), fontdict={'size': 9})  # limit to 40 characters
+        plt.title('%s = %.3g' % (k, mu), fontdict={
+                  'size': 9})  # limit to 40 characters
         if i % 5 != 0:
             plt.yticks([])
         print('%15s: %.3g' % (k, mu))
@@ -319,12 +337,15 @@ def plot_evolution(yaml_file='data/hyp.finetune.yaml'):  # from utils.general im
     print('\nPlot saved as evolve.png')
 
 
-def plot_results_overlay(start=0, stop=0):  # from utils.general import *; plot_results_overlay()
+# from utils.general import *; plot_results_overlay()
+def plot_results_overlay(start=0, stop=0, save_dir=''):
     # Plot training 'results*.txt', overlaying train and val losses
-    s = ['train', 'train', 'train', 'Precision', 'mAP@0.5', 'val', 'val', 'val', 'Recall', 'mAP@0.5:0.95']  # legends
+    s = ['train', 'train', 'train', 'Precision', 'mAP@0.5',
+         'val', 'val', 'val', 'Recall', 'mAP@0.5:0.95']  # legends
     t = ['Box', 'Objectness', 'Classification', 'P-R', 'mAP-F1']  # titles
     for f in sorted(glob.glob('results*.txt') + glob.glob('../../Downloads/results*.txt')):
-        results = np.loadtxt(f, usecols=[2, 3, 4, 8, 9, 12, 13, 14, 10, 11], ndmin=2).T
+        results = np.loadtxt(
+            f, usecols=[2, 3, 4, 8, 9, 12, 13, 14, 10, 11], ndmin=2).T
         n = results.shape[1]  # number of rows
         x = range(start, min(stop, n) if stop else n)
         fig, ax = plt.subplots(1, 5, figsize=(14, 3.5), tight_layout=True)
@@ -342,6 +363,32 @@ def plot_results_overlay(start=0, stop=0):  # from utils.general import *; plot_
         fig.savefig(f.replace('.txt', '.png'), dpi=200)
 
 
+# from utils.general import *; plot_results_overlay()
+def plot_results_overlay2(start=0, stop=0):
+    # Plot training 'results*.txt', overlaying train and val losses
+    s = ['train', 'train', 'train', 'Precision', 'mAP@0.5',
+         'val', 'val', 'val', 'Recall', 'mAP@0.5:0.95']  # legends
+    t = ['Box', 'Objectness', 'Classification', 'P-R', 'mAP-F1']  # titles
+    for f in sorted(glob.glob('results*.txt') + glob.glob('../../Downloads/results*.txt')):
+        results = np.loadtxt(
+            f, usecols=[2, 3, 4, 8, 9, 12, 13, 14, 10, 11], ndmin=2).T
+        n = results.shape[1]  # number of rows
+        x = range(start, min(stop, n) if stop else n)
+        fig, ax = plt.subplots(1, 5, figsize=(14, 3.5), tight_layout=True)
+        ax = ax.ravel()
+        for i in range(5):
+            # for j in [i, i + 5]:
+            #     y = results[j, x]
+            #     ax[i].plot(x, y, marker='.', label=s[j])
+            #     # y_smooth = butter_lowpass_filtfilt(y)
+            #     # ax[i].plot(x, np.gradient(y_smooth), marker='.', label=s[j])
+            ax[i].set_title(t[i])
+            ax[i].legend()
+            ax[i].set_ylabel(f) if i == 0 else None  # add filename
+        plt.show()
+        #fig.savefig(save_dir, dpi=200)
+
+
 def plot_results(start=0, stop=0, bucket='', id=(), labels=(), save_dir=''):
     # from utils.general import *; plot_results(save_dir='runs/train/exp0')
     # Plot training 'results*.txt'
@@ -353,14 +400,18 @@ def plot_results(start=0, stop=0, bucket='', id=(), labels=(), save_dir=''):
         # os.system('rm -rf storage.googleapis.com')
         # files = ['https://storage.googleapis.com/%s/results%g.txt' % (bucket, x) for x in id]
         files = ['%g.txt' % x for x in id]
-        c = ('gsutil cp ' + '%s ' * len(files) + '.') % tuple('gs://%s/%g.txt' % (bucket, x) for x in id)
+        c = ('gsutil cp ' + '%s ' * len(files) +
+             '.') % tuple('gs://%s/%g.txt' % (bucket, x) for x in id)
         os.system(c)
     else:
-        files = glob.glob(str(Path(save_dir) / '*.txt')) + glob.glob('../../Downloads/results*.txt')
-    assert len(files), 'No results.txt files found in %s, nothing to plot.' % os.path.abspath(save_dir)
+        files = glob.glob(str(Path(save_dir) / '*.txt')) + \
+            glob.glob('../../Downloads/results*.txt')
+    assert len(
+        files), 'No results.txt files found in %s, nothing to plot.' % os.path.abspath(save_dir)
     for fi, f in enumerate(files):
         try:
-            results = np.loadtxt(f, usecols=[2, 3, 4, 8, 9, 12, 13, 14, 10, 11], ndmin=2).T
+            results = np.loadtxt(
+                f, usecols=[2, 3, 4, 8, 9, 12, 13, 14, 10, 11], ndmin=2).T
             n = results.shape[1]  # number of rows
             x = range(start, min(stop, n) if stop else n)
             for i in range(10):
@@ -369,7 +420,8 @@ def plot_results(start=0, stop=0, bucket='', id=(), labels=(), save_dir=''):
                     y[y == 0] = np.nan  # don't show zero loss values
                     # y /= y[0]  # normalize
                 label = labels[fi] if len(labels) else Path(f).stem
-                ax[i].plot(x, y, marker='.', label=label, linewidth=1, markersize=6)
+                ax[i].plot(x, y, marker='.', label=label,
+                           linewidth=1, markersize=6)
                 ax[i].set_title(s[i])
                 # if i in [5, 6, 7]:  # share train and val loss y axes
                 #     ax[i].get_shared_y_axes().join(ax[i], ax[i - 5])
