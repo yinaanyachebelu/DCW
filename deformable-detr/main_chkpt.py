@@ -221,7 +221,8 @@ def main(args):
     else:
         optimizer = torch.optim.AdamW(param_dicts, lr=args.lr,
                                       weight_decay=args.weight_decay)
-    lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
+
+    #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
     # lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     # optimizer, T_max=50, eta_min=2e-5)
 
