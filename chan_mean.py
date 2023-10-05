@@ -7,7 +7,7 @@ import torchvision
 from torchvision import transforms
 from torch.utils.data import DataLoader
 
-data_path = './datasets/Dataset_final/DATA_0_COCO_format/train2017/'
+data_path = './datasets/Dataset_final/DATA_0_COCO_format/'
 
 transform_img = transforms.Compose([
     transforms.Resize(256),
