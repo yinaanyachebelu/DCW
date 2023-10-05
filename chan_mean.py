@@ -1,3 +1,4 @@
+
 #########
 
 #code to find mean and std for dataset derived from : https://www.binarystudy.com/2022/04/how-to-normalize-image-dataset-inpytorch.html
@@ -6,7 +7,7 @@ import torchvision
 from torchvision import transforms
 from torch.utils.data import DataLoader
 
-data_path = 'home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/train2017/'
+data_path = './datasets/Dataset_final/DATA_0_COCO_format/train2017/'
 
 transform_img = transforms.Compose([
     transforms.Resize(256),
