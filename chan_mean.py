@@ -6,20 +6,23 @@
 import torchvision
 from torchvision import transforms
 from torch.utils.data import DataLoader
+from torchvision.datasets import ImageFolder
+
 
 data_path = './datasets/Dataset_final/DATA_0_COCO_format/'
+dataset = ImageFolder(data_path)
 
-transform_img = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(256),
-    transforms.ToTensor(),
-])
+# transform_img = transforms.Compose([
+#     transforms.Resize(256),
+#     transforms.CenterCrop(256),
+#     transforms.ToTensor(),
+# ])
 
-batch_size = 2
+# batch_size = 2
 
-image_data = torchvision.datasets.ImageFolder(
-  root=data_path, transform=transform_img
-)
+# image_data = torchvision.datasets.ImageFolder(
+#   root=data_path, transform=transform_img
+# )
 
 def batch_mean_and_sd(loader):
     
@@ -45,12 +48,14 @@ def batch_mean_and_sd(loader):
 
 if __name__ == '__main__':
     
-    loader = DataLoader(
-        image_data, 
-        batch_size = batch_size, 
-        num_workers=1)
+    # loader = DataLoader(
+    #     image_data, 
+    #     batch_size = batch_size, 
+    #     num_workers=1)
     
-    mean, std = batch_mean_and_sd(loader)
-    print("mean and std: \n", mean, std)
+    # mean, std = batch_mean_and_sd(loader)
+    # print("mean and std: \n", mean, std)
+    
+    dataset.class_to_idx
     
     
