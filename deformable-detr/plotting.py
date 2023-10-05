@@ -13,7 +13,7 @@ def get_args_parser():
     return parser
 
 
-fields_of_interest = ('mAP', 'loss')
+fields_of_interest = ('mAP', 'loss', 'class_error', 'loss_bbox', 'loss_ciou')
 
 
 if __name__ == "__main__":

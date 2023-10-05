@@ -74,8 +74,10 @@ def plot_logs(logs, save_dir, fields=('mAP', 'class_error', 'loss_bbox_unscaled'
                 df.interpolate().ewm(com=ewm_col).mean().plot(
                     y=[f'train_{field}', f'test_{field}'],
                     ax=axs[j],
-                    color=[color] * 2,
-                    style=['-', '--']
+                    #color=[color] * 2,
+                    color=['blue', 'orange'],
+                    #style=['-', '--'],
+                    style=['-', '-']
                 )
     for ax, field in zip(axs, fields):
         #ax.legend([Path(p).name for p in logs])
