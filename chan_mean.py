@@ -78,8 +78,8 @@ def make_coco_transforms(image_set):
     raise ValueError(f'unknown {image_set}')
 
 
-def build_dataset(image_set, args):
-    root = Path(args.coco_path)
+def build_dataset(image_set, coco_path='/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/'):
+    root = Path(coco_path)
     assert root.exists(), f'provided COCO path {root} does not exist'
     # Each key in dict below is tuple  : ( Path to images, Annotation file for those images  )
     mode = 'instances'
@@ -90,8 +90,8 @@ def build_dataset(image_set, args):
     }
 
     img_folder, ann_file = PATHS[image_set]
-    dataset = CocoDetection(img_folder, ann_file, transforms=make_coco_transforms(image_set), return_masks=args.masks,
-                            cache_mode=args.cache_mode, local_rank=get_local_rank(), local_size=get_local_size())
+    dataset = CocoDetection(img_folder, ann_file, transforms=make_coco_transforms(image_set), return_masks=False,
+                            cache_mode=False, local_rank=get_local_rank(), local_size=get_local_size())
     return dataset
 
 
@@ -123,7 +123,8 @@ if __name__ == '__main__':
 
     batch_size = 4
 
-    dataset_train = build_dataset(image_set='train', args=args)
+    dataset_train = build_dataset(
+        image_set='train', coco_path='/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/')
     sampler_train = samplers.DistributedSampler(dataset_train)
     batch_sampler_train = torch.utils.data.BatchSampler(
         sampler_train, batch_size, drop_last=True)
