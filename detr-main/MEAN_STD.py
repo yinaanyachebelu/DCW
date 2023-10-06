@@ -6,8 +6,8 @@ from torch.utils.data import DataLoader
 data_path = '/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_mean_std'
 
 transform_img = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(256),
+    transforms.Resize(448),
+    transforms.CenterCrop(448),
     transforms.ToTensor(),
 ])
 
