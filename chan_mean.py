@@ -1,5 +1,5 @@
 
-#########
+##########
 
 # code to find mean and std for dataset derived from : https://www.binarystudy.com/2022/04/how-to-normalize-image-dataset-inpytorch.html
 
