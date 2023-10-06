@@ -1,3 +1,5 @@
+# code taken from https://www.binarystudy.com/2022/04/how-to-normalize-image-dataset-inpytorch.html
+
 import torch
 import torchvision
 from torchvision import transforms
