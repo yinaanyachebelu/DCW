@@ -127,7 +127,9 @@ if __name__ == '__main__':
 
     dataset_train = build_dataset(
         image_set='train', coco_path='/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/')
+
     sampler_train = samplers.DistributedSampler(dataset_train)
+
     batch_sampler_train = torch.utils.data.BatchSampler(
         sampler_train, batch_size, drop_last=True)
 
