@@ -97,32 +97,28 @@ def mean_std(data,
     seen = 0
     ######################################################################
 
-    for batch_i, (img, targets, paths, shapes) in enumerate(dataloader):
-        print(img.shape)
+    for batch_i, (images, targets, paths, shapes) in enumerate(dataloader):
 
+        cnt = 0
+        fst_moment = torch.empty(3)
+        snd_moment = torch.empty(3)
 
-# def batch_mean_and_sd(loader):
+        b, c, h, w = images.shape
+        nb_pixels = b * h * w
+        sum_ = torch.sum(images, dim=[0, 2, 3])
+        sum_of_square = torch.sum(images ** 2,
+                                  dim=[0, 2, 3])
+        fst_moment = (cnt * fst_moment + sum_) / (
+            cnt + nb_pixels)
+        snd_moment = (cnt * snd_moment + sum_of_square) / (
+            cnt + nb_pixels)
+        cnt += nb_pixels
 
-#     cnt = 0
-#     fst_moment = torch.empty(3)
-#     snd_moment = torch.empty(3)
+    mean, std = fst_moment, torch.sqrt(
+        snd_moment - fst_moment ** 2)
 
-#     for images, _ in loader:
-#         print(images.shape)
-#     #     b, c, h, w = images.shape
-#     #     nb_pixels = b * h * w
-#     #     sum_ = torch.sum(images, dim=[0, 2, 3])
-#     #     sum_of_square = torch.sum(images ** 2,
-#     #                               dim=[0, 2, 3])
-#     #     fst_moment = (cnt * fst_moment + sum_) / (
-#     #                   cnt + nb_pixels)
-#     #     snd_moment = (cnt * snd_moment + sum_of_square) / (
-#     #                         cnt + nb_pixels)
-#     #     cnt += nb_pixels
+    return mean, std
 
-#     # mean, std = fst_moment, torch.sqrt(
-#     #   snd_moment - fst_moment ** 2)
-#     #    return mean, std
 
 if __name__ == '__main__':
 
@@ -167,16 +163,18 @@ if __name__ == '__main__':
                         default='./data/weed.names', help='*.cfg path')
     opt = parser.parse_args()
 
-    mean_std(opt.data,
-             opt.weights,
-             opt.batch_size,
-             opt.img_size,
-             opt.conf_thres,
-             opt.iou_thres,
-             opt.save_json,
-             opt.single_cls,
-             opt.augment,
-             opt.verbose,
-             save_txt=opt.save_txt,
-             save_conf=opt.save_conf,
-             )
+    mean, std = mean_std(opt.data,
+                         opt.weights,
+                         opt.batch_size,
+                         opt.img_size,
+                         opt.conf_thres,
+                         opt.iou_thres,
+                         opt.save_json,
+                         opt.single_cls,
+                         opt.augment,
+                         opt.verbose,
+                         save_txt=opt.save_txt,
+                         save_conf=opt.save_conf,
+                         )
+
+    print("mean and std: \n", mean, std)
