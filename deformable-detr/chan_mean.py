@@ -26,30 +26,30 @@ import cv2
 data_path = './datasets/Dataset_final/DATA_0_COCO_format/'
 
 
-class WeedData(Dataset):
+# class WeedData(Dataset):
 
-    def __init__(self,
-                 data,
-                 directory,
-                 transform=None):
-        self.data = data
-        self.directory = directory
-        self.transform = transform
+#     def __init__(self,
+#                  data,
+#                  directory,
+#                  transform=None):
+#         self.data = data
+#         self.directory = directory
+#         self.transform = transform
 
-    def __len__(self):
-        return len(self.data)
+#     def __len__(self):
+#         return len(self.data)
 
-    def __getitem__(self, idx):
+#     def __getitem__(self, idx):
 
-        # import
-        path = os.path.join(self.directory, self.data.iloc[idx]['image_id'])
-        image = cv2.imread(path, cv2.COLOR_BGR2RGB)
+#         # import
+#         path = os.path.join(self.directory, self.data.iloc[idx]['image_id'])
+#         image = cv2.imread(path, cv2.COLOR_BGR2RGB)
 
-        # augmentations
-        if self.transform is not None:
-            image = self.transform(image=image)['image']
+#         # augmentations
+#         if self.transform is not None:
+#             image = self.transform(image=image)['image']
 
-        return image
+#         return image
 
 
 class CocoDetection(TvCocoDetection):
