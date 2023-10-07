@@ -224,10 +224,10 @@ def main(args):
 
     #lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
     lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,
-                                                       max_lr=2.5e-6,
+                                                       max_lr=1.1e-4,
                                                        pct_start=0.2,
-                                                       div_factor=1.5,
-                                                       final_div_factor=2.5,
+                                                       div_factor=2.5,
+                                                       final_div_factor=25,
                                                        steps_per_epoch=917,
                                                        epochs=args.epochs,
                                                        anneal_strategy='cos')  # Specifies the annealing strategy
