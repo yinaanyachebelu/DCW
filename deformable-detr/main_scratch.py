@@ -305,23 +305,10 @@ def main(args):
             #     print("base lr:")
             #     print(lr_scheduler.base_lrs)
 
-            optimizer.load_state_dict(checkpoint['optimizer'])
-            # lr_scheduler.step(lr_scheduler.last_epoch)
-
-            # optimizer.param_groups[0]["lr"] = 0.1 # lr you want for the transformer
-            # optimizer.param_groups[1]["lr"] = 0.01 # lr you want for the backbone
-
-            lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,
-                                                               max_lr=1e-6,
-                                                               pct_start=0.2,
-                                                               div_factor=1.5,
-                                                               final_div_factor=2,
-                                                               steps_per_epoch=917,
-                                                               epochs=args.epochs,
-                                                               anneal_strategy='cos')
-            lr_scheduler.step()
-
+            lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
+            lr_scheduler.step(lr_scheduler.last_epoch)
             args.start_epoch = checkpoint['epoch'] + 1
+
         # check the resumed model
         if not args.eval:
             test_stats, coco_evaluator, val_loss = evaluate(
