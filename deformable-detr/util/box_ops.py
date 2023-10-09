@@ -81,14 +81,14 @@ def box_diou(boxes1, boxes2):
     # central points of bunding boxes
     logit_center_x = boxes1[:, 0::2].mean(dim=-1)
     logit_center_y = boxes1[:, 1::2].mean(dim=-1)
-    label_center_x = boxes2[:, 0::2].mean(dim=-1)
-    label_center_y = boxes2[:, 1::2].mean(dim=-1)
+    label_center_x = boxes2[:, None, 0::2].mean(dim=-1)
+    label_center_y = boxes2[:, None, 1::2].mean(dim=-1)
     center_dist = (label_center_x - logit_center_x).pow(2.) + \
         (label_center_y - logit_center_y).pow(2.)
 
     # diagonal length
-    lt = torch.max(boxes2[:, :2], boxes1[:, :2])
-    rb = torch.min(boxes2[:, 2:], boxes1[:, 2:])
+    lt = torch.min(boxes1[:, None, :2], boxes2[:, :2])
+    rb = torch.max(boxes1[:, None, 2:], boxes2[:, 2:])
     diag_len = (lt - rb).pow(2.).sum(dim=-1)
 
     # calculate diou score
@@ -96,6 +96,7 @@ def box_diou(boxes1, boxes2):
     diou = iou - penalty
 
     return diou
+
 
 def box_ciou_loss(logits, labels):
     iou, union = box_iou(logits, labels)
@@ -105,21 +106,25 @@ def box_ciou_loss(logits, labels):
     logits_center_x, logits_center_y = logits[:, 0], logits[:, 1]
     labels_center_x, labels_center_y = labels[:, 0], labels[:, 1]
 
-    logits_x1, logits_y1 = logits[:, 0] - logits[:, 2] / 2, logits[:, 1] - logits[:, 3] / 2
-    logits_x2, logits_y2 = logits[:, 0] + logits[:, 2] / 2, logits[:, 1] + logits[:, 3] / 2
+    logits_x1, logits_y1 = logits[:, 0] - \
+        logits[:, 2] / 2, logits[:, 1] - logits[:, 3] / 2
+    logits_x2, logits_y2 = logits[:, 0] + \
+        logits[:, 2] / 2, logits[:, 1] + logits[:, 3] / 2
 
-    labels_x1, labels_y1 = labels[:, 0] - labels[:, 2] / 2, labels[:, 1] - labels[:, 3] / 2
-    labels_x2, labels_y2 = labels[:, 0] + labels[:, 2] / 2, labels[:, 1] + labels[:, 3] / 2
+    labels_x1, labels_y1 = labels[:, None, 0] - \
+        labels[:, None, 2] / 2, labels[:, None, 1] - labels[:, None, 3] / 2
+    labels_x2, labels_y2 = labels[:, None, 0] + \
+        labels[:, None, 2] / 2, labels[:, None, 1] + labels[:, None, 3] / 2
 
     logits_width, logits_height = logits_x2 - logits_x1, logits_y2 - logits_y1
     labels_width, labels_height = labels_x2 - labels_x1, labels_y2 - labels_y1
 
     v = (4 / math.pi ** 2) * torch.pow(
         torch.atan(labels_width / (labels_height + smooth)) - torch.atan(logits_width / (logits_height + smooth)), 2)
-    
+
     with torch.no_grad():
         alpha = v / (1 - iou + v + smooth)
-    
+
     ciou_loss = 1 - diou + alpha * v
     return ciou_loss
 

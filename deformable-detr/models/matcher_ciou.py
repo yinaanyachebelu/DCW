@@ -112,10 +112,12 @@ class HungarianMatcher(nn.Module):
             logits_x2, logits_y2 = logits[:, 0] + \
                 logits[:, 2] / 2, logits[:, 1] + logits[:, 3] / 2
 
-            labels_x1, labels_y1 = labels[:, 0] - \
-                labels[:, 2] / 2, labels[:, 1] - labels[:, 3] / 2
+            labels_x1, labels_y1 = labels[:, None, 0] - \
+                labels[:, None, 2] / 2, labels[:, None, 1] - \
+                labels[:, None, 3] / 2
             labels_x2, labels_y2 = labels[:, 0] + \
-                labels[:, 2] / 2, labels[:, 1] + labels[:, 3] / 2
+                labels[:, None, 2] / 2, labels[:, None, 1] + \
+                labels[:, None, 3] / 2
 
             logits_width, logits_height = logits_x2 - logits_x1, logits_y2 - logits_y1
             labels_width, labels_height = labels_x2 - labels_x1, labels_y2 - labels_y1
