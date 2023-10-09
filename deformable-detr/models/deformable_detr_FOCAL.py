@@ -306,44 +306,9 @@ class SetCriterion(nn.Module):
         #     box_ops.box_cxcywh_to_xyxy(target_boxes)))
         # losses['loss_diou'] = loss_diou.sum() / num_boxes
 
-        logits = box_ops.box_cxcywh_to_xyxy(src_boxes)
-        labels = box_ops.box_cxcywh_to_xyxy(target_boxes)
-
-        # code from pytorch loss metric: https://github.com/Sangh0/pytorch-loss-metric/blob/main/detection/ciou.py
-
-        def box_ciou_loss(logits, labels):
-
-            iou, union = box_ops.box_iou(logits, labels)
-            diou = box_ops.box_diou(logits, labels)
-            smooth = 1e-9
-
-            logits_center_x, logits_center_y = logits[:, 0], logits[:, 1]
-            labels_center_x, labels_center_y = labels[:, 0], labels[:, 1]
-
-            logits_x1, logits_y1 = logits[:, 0] - \
-                logits[:, 2] / 2, logits[:, 1] - logits[:, 3] / 2
-            logits_x2, logits_y2 = logits[:, 0] + \
-                logits[:, 2] / 2, logits[:, 1] + logits[:, 3] / 2
-
-            labels_x1, labels_y1 = labels[:, 0] - \
-                labels[:, 2] / 2, labels[:, 1] - labels[:, 3] / 2
-            labels_x2, labels_y2 = labels[:, 0] + \
-                labels[:, 2] / 2, labels[:, 1] + labels[:, 3] / 2
-
-            logits_width, logits_height = logits_x2 - logits_x1, logits_y2 - logits_y1
-            labels_width, labels_height = labels_x2 - labels_x1, labels_y2 - labels_y1
-
-            v = (4 / math.pi ** 2) * torch.pow(
-                torch.atan(labels_width / (labels_height + smooth)) - torch.atan(logits_width / (logits_height + smooth)), 2)
-
-            with torch.no_grad():
-                alpha = v / (1 - iou + v + smooth)
-
-            ciou_loss = 1 - diou + alpha * v
-            ciou_loss = torch.diag(ciou_loss)
-            return ciou_loss
-
-        loss_ciou = box_ciou_loss(logits, labels)
+        loss_ciou = 1 - torch.diag(box_ops.box_ciou_loss(
+            box_ops.box_cxcywh_to_xyxy(src_boxes),
+            box_ops.box_cxcywh_to_xyxy(target_boxes)))
         losses['loss_ciou'] = loss_ciou.sum() / num_boxes
 
         return losses
