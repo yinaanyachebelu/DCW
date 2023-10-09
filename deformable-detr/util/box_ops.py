@@ -12,6 +12,7 @@ Utilities for bounding box manipulation and GIoU.
 """
 import torch
 from torchvision.ops.boxes import box_area
+from torchvision.ops._utils import _upcast
 import math
 
 
@@ -78,54 +79,68 @@ def box_diou(boxes1, boxes2):
     iou, union = box_iou(boxes1, boxes2)
     smooth = 1e-9
 
-    # central points of bunding boxes
-    logit_center_x = boxes1[:, 0::2].mean(dim=-1)
-    logit_center_y = boxes1[:, 1::2].mean(dim=-1)
-    label_center_x = boxes2[:, None, 0::2].mean(dim=-1)
-    label_center_y = boxes2[:, None, 1::2].mean(dim=-1)
-    center_dist = (label_center_x - logit_center_x).pow(2.) + \
-        (label_center_y - logit_center_y).pow(2.)
+    boxes1 = _upcast(boxes1)
+    boxes2 = _upcast(boxes2)
 
-    # diagonal length
-    lt = torch.min(boxes1[:, None, :2], boxes2[:, :2])
-    rb = torch.max(boxes1[:, None, 2:], boxes2[:, 2:])
-    diag_len = (lt - rb).pow(2.).sum(dim=-1)
+    lti = torch.min(boxes1[:, None, :2], boxes2[:, :2])
+    rbi = torch.max(boxes1[:, None, 2:], boxes2[:, 2:])
+    whi = _upcast(rbi - lti).clamp(min=0)  # [N,M,2]
+    diagonal_distance_squared = (
+        whi[:, :, 0] ** 2) + (whi[:, :, 1] ** 2) + smooth
+    # centers of boxes
+    x_p = (boxes1[:, 0] + boxes1[:, 2]) / 2
+    y_p = (boxes1[:, 1] + boxes1[:, 3]) / 2
+    x_g = (boxes2[:, 0] + boxes2[:, 2]) / 2
+    y_g = (boxes2[:, 1] + boxes2[:, 3]) / 2
+    # The distance between boxes' centers squared.
+    centers_distance_squared = (_upcast((x_p[:, None] - x_g[None, :])) ** 2) + (
+        _upcast((y_p[:, None] - y_g[None, :])) ** 2
+    )
 
-    # calculate diou score
-    penalty = center_dist / (diag_len + smooth)
-    diou = iou - penalty
+    diou = iou - (centers_distance_squared / diagonal_distance_squared)
+    # The distance IoU is the IoU penalized by a normalized
+    # distance between boxes' centers squared.
 
     return diou
 
 
-def box_ciou_loss(logits, labels):
-    iou, union = box_iou(logits, labels)
-    diou = box_diou(logits, labels)
+def box_ciou_loss(boxes1, boxes2):
+    iou, union = box_iou(boxes1, boxes2)
     smooth = 1e-9
 
-    logits_center_x, logits_center_y = logits[:, 0], logits[:, 1]
-    labels_center_x, labels_center_y = labels[:, 0], labels[:, 1]
+    boxes1 = _upcast(boxes1)
+    boxes2 = _upcast(boxes2)
 
-    logits_x1, logits_y1 = logits[:, 0] - \
-        logits[:, 2] / 2, logits[:, 1] - logits[:, 3] / 2
-    logits_x2, logits_y2 = logits[:, 0] + \
-        logits[:, 2] / 2, logits[:, 1] + logits[:, 3] / 2
+    # diou section
+    lti = torch.min(boxes1[:, None, :2], boxes2[:, :2])
+    rbi = torch.max(boxes1[:, None, 2:], boxes2[:, 2:])
+    whi = _upcast(rbi - lti).clamp(min=0)  # [N,M,2]
+    diagonal_distance_squared = (
+        whi[:, :, 0] ** 2) + (whi[:, :, 1] ** 2) + smooth
+    # centers of boxes
+    x_p = (boxes1[:, 0] + boxes1[:, 2]) / 2
+    y_p = (boxes1[:, 1] + boxes1[:, 3]) / 2
+    x_g = (boxes2[:, 0] + boxes2[:, 2]) / 2
+    y_g = (boxes2[:, 1] + boxes2[:, 3]) / 2
+    # The distance between boxes' centers squared.
+    centers_distance_squared = (_upcast((x_p[:, None] - x_g[None, :])) ** 2) + (
+        _upcast((y_p[:, None] - y_g[None, :])) ** 2
+    )
+    diou = iou - (centers_distance_squared / diagonal_distance_squared)
 
-    labels_x1, labels_y1 = labels[:, None, 0] - \
-        labels[:, None, 2] / 2, labels[:, None, 1] - labels[:, None, 3] / 2
-    labels_x2, labels_y2 = labels[:, None, 0] + \
-        labels[:, None, 2] / 2, labels[:, None, 1] + labels[:, None, 3] / 2
+    # ciou section
+    w_pred = boxes1[:, None, 2] - boxes1[:, None, 0]
+    h_pred = boxes1[:, None, 3] - boxes1[:, None, 1]
 
-    logits_width, logits_height = logits_x2 - logits_x1, logits_y2 - logits_y1
-    labels_width, labels_height = labels_x2 - labels_x1, labels_y2 - labels_y1
+    w_gt = boxes2[:, 2] - boxes2[:, 0]
+    h_gt = boxes2[:, 3] - boxes2[:, 1]
 
-    v = (4 / math.pi ** 2) * torch.pow(
-        torch.atan(labels_width / (labels_height + smooth)) - torch.atan(logits_width / (logits_height + smooth)), 2)
-
+    v = (4 / (torch.pi**2)) * \
+        torch.pow(torch.atan(w_pred / h_pred) - torch.atan(w_gt / h_gt), 2)
     with torch.no_grad():
         alpha = v / (1 - iou + v + smooth)
+    ciou_loss = diou - alpha * v
 
-    ciou_loss = 1 - diou + alpha * v
     return ciou_loss
 
 

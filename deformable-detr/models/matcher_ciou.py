@@ -15,7 +15,7 @@ from scipy.optimize import linear_sum_assignment
 from torch import nn
 
 from util import box_ops
-from util.box_ops import box_cxcywh_to_xyxy, generalized_box_iou
+from util.box_ops import box_cxcywh_to_xyxy, generalized_box_iou, box_ciou_loss
 import math
 
 
@@ -97,40 +97,18 @@ class HungarianMatcher(nn.Module):
 
             iou, union = box_ops.box_iou(box_cxcywh_to_xyxy(
                 out_bbox), box_cxcywh_to_xyxy(tgt_bbox))
-            diou = box_ops.box_diou(box_cxcywh_to_xyxy(
-                out_bbox), box_cxcywh_to_xyxy(tgt_bbox))
+
             smooth = 1e-9
 
             logits = box_cxcywh_to_xyxy(out_bbox)
             labels = box_cxcywh_to_xyxy(tgt_bbox)
 
-            logits_center_x, logits_center_y = logits[:, 0], logits[:, 1]
-            labels_center_x, labels_center_y = labels[:, 0], labels[:, 1]
-
-            logits_x1, logits_y1 = logits[:, 0] - \
-                logits[:, 2] / 2, logits[:, 1] - logits[:, 3] / 2
-            logits_x2, logits_y2 = logits[:, 0] + \
-                logits[:, 2] / 2, logits[:, 1] + logits[:, 3] / 2
-
-            labels_x1, labels_y1 = labels[:, None, 0] - \
-                labels[:, None, 2] / 2, labels[:, None, 1] - \
-                labels[:, None, 3] / 2
-            labels_x2, labels_y2 = labels[:, 0] + \
-                labels[:, None, 2] / 2, labels[:, None, 1] + \
-                labels[:, None, 3] / 2
-
-            logits_width, logits_height = logits_x2 - logits_x1, logits_y2 - logits_y1
-            labels_width, labels_height = labels_x2 - labels_x1, labels_y2 - labels_y1
-
-            v = (4 / math.pi ** 2) * torch.pow(
-                torch.atan(labels_width / (labels_height + smooth)) - torch.atan(logits_width / (logits_height + smooth)), 2)
-
-            alpha = v / (1 - iou + v + smooth)
-            ciou_loss = 1 - diou + alpha * v
+            cost_ciou = -box_ciou_loss(box_cxcywh_to_xyxy(out_bbox),
+                                       box_cxcywh_to_xyxy(tgt_bbox))
 
             # Final cost matrix
             C = self.cost_bbox * cost_bbox + self.cost_class * \
-                cost_class + self.cost_giou * ciou_loss  # changed to ciou
+                cost_class + self.cost_giou * cost_ciou  # changed to ciou
             C = C.view(bs, num_queries, -1).cpu()
 
             sizes = [len(v["boxes"]) for v in targets]
