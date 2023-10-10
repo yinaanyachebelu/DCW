@@ -42,7 +42,7 @@ cats = [
 ]
 
 
-def main():
+def main(args):
 
     pred_path = args.pred_path
 
