@@ -1,7 +1,7 @@
 import json
 
 # Specify the path to your JSON file
-ann_path= "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_val2017.json"
+ann_path= "/home/ayina/MscThesis/DCW/datasets/Dataset_final/DATA_0_COCO_format/annotations/instances_test2017.json"
 
 # Read the JSON file and load its contents into a Python dictionary
 with open(ann_path, "r") as json_file:
