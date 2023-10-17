@@ -1,7 +1,7 @@
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 from pycocotools.cocoeval import Params
-#from IPython.display import JSON
+from IPython.display import JSON
 import numpy as np
 from Evaluator import evaluate_metrics, display_metrics
 import argparse
@@ -28,8 +28,8 @@ def _compute_and_display_metrics(args):
         cocoEval, params, args.show_eval_summary)
 
     # take precision for all classes, all areas and 100 detections
-    # display_metrics(precision, recall, scores, iou_lookup,
-    #                 log_path=args.output_log_path)
+    display_metrics(precision, recall, scores, iou_lookup,
+                    log_path=args.output_log_path)
 
     # Calculate metrics for each category
     for cat in coco_gt.loadCats(coco_gt.getCatIds()):
@@ -38,8 +38,8 @@ def _compute_and_display_metrics(args):
         precision, recall, scores, iou_lookup = evaluate_metrics(
             cocoEval, params, args.show_eval_summary)
         # take precision for all classes, all areas and 100 detections
-        # display_metrics(precision, recall, scores, iou_lookup,
-        #                 class_name=cat["name"], log_path=args.output_log_path)
+        display_metrics(precision, recall, scores, iou_lookup,
+                        class_name=cat["name"], log_path=args.output_log_path)
 
 
 if __name__ == "__main__":
