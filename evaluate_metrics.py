@@ -28,8 +28,8 @@ def _compute_and_display_metrics(args):
         cocoEval, params, args.show_eval_summary)
 
     # take precision for all classes, all areas and 100 detections
-    display_metrics(precision, recall, scores, iou_lookup,
-                    log_path=args.output_log_path)
+    # display_metrics(precision, recall, scores, iou_lookup,
+    #                 log_path=args.output_log_path)
 
     # Calculate metrics for each category
     for cat in coco_gt.loadCats(coco_gt.getCatIds()):
@@ -38,8 +38,8 @@ def _compute_and_display_metrics(args):
         precision, recall, scores, iou_lookup = evaluate_metrics(
             cocoEval, params, args.show_eval_summary)
         # take precision for all classes, all areas and 100 detections
-        display_metrics(precision, recall, scores, iou_lookup,
-                        class_name=cat["name"], log_path=args.output_log_path)
+        # display_metrics(precision, recall, scores, iou_lookup,
+        #                 class_name=cat["name"], log_path=args.output_log_path)
 
 
 if __name__ == "__main__":
@@ -47,8 +47,8 @@ if __name__ == "__main__":
         description="Evaluate Metrics from the predictions and Ground Truths")
     parser.add_argument("--gt_coco_path", type=str, required=True)
     parser.add_argument("--evaluation_result_path", type=str, required=True)
-    parser.add_argument("--output_log_path", type=str,
-                        default="evaluation.log")
+    # parser.add_argument("--output_log_path", type=str,
+    #                     default="evaluation.log")
     parser.add_argument("--show_eval_summary", type=bool, default=False)
 
     args = parser.parse_args()
