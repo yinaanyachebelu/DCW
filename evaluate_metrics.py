@@ -47,8 +47,8 @@ if __name__ == "__main__":
         description="Evaluate Metrics from the predictions and Ground Truths")
     parser.add_argument("--gt_coco_path", type=str, required=True)
     parser.add_argument("--evaluation_result_path", type=str, required=True)
-    # parser.add_argument("--output_log_path", type=str,
-    #                     default="evaluation.log")
+    parser.add_argument("--output_log_path", type=str,
+                        default="evaluation.log")
     parser.add_argument("--show_eval_summary", type=bool, default=False)
 
     args = parser.parse_args()
