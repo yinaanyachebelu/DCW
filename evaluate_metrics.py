@@ -1,7 +1,7 @@
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 from pycocotools.cocoeval import Params
-from IPython.display import JSON
+#from IPython.display import JSON
 import numpy as np
 from Evaluator import evaluate_metrics, display_metrics
 import argparse
