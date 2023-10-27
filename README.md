@@ -4,7 +4,7 @@ This repo contains the code for "Weed Detection for Cotton Production Using Tran
 
 ## Dataset
 ### Data Preparation
-- The data used in the study is from the CottonWeedDet12 Dataset available at [Zenodo](https://doi.org/10.5281/zenodo.7535814)
+The data used in the study is from the CottonWeedDet12 Dataset available at [Zenodo](https://doi.org/10.5281/zenodo.7535814)
 -  `commons/vig2yolov5.py` converts the data from VGG format to YOLO format
 -  `commons/pationing_dataset_yolov5.py` splits the data into training, validation and testing sets
 -   `commons/yolov52coco.py` converts the data from YOLO format to COCO format
