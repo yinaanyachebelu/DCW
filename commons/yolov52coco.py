@@ -1,3 +1,5 @@
+## The following code comes from the Github repository for the CottonWeedDet12 Benchmark paper by Dang et. al. (2023): https://github.com/DongChen06/DCW
+
 import argparse
 from pathlib import Path
 import json

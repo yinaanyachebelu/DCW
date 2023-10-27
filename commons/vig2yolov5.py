@@ -1,4 +1,5 @@
-# under CottonWeed_Detection
+# The following code comes from the Github repository for the CottonWeedDet12 Benchmark paper by Dang et. al. (2023): https://github.com/DongChen06/DCW
+
 # run: python commons/vig2yolov5.py
 
 import cv2
