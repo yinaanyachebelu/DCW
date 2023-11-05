@@ -95,8 +95,8 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
         model = Darknet(opt.cfg).to(device)  # create
 
     # counting parameters
-    n_parameters = sum(p.numel() for p in model.parameters())
-    print('number of params:', n_parameters)
+    #n_parameters = sum(p.numel() for p in model.parameters())
+    #print('number of params:', n_parameters)
 
     # Optimizer
     nbs = 64  # nominal batch size
